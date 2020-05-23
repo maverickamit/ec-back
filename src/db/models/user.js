@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 
-const User = mongoose.model("User", {
+const userSchema = mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
   email: {
@@ -21,6 +21,8 @@ const User = mongoose.model("User", {
     minlength: 8,
   },
 });
+
+const User = mongoose.model("User", userSchema);
 
 // const newUser = new User({
 //   firstName: "Amit",
