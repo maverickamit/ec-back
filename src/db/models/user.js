@@ -22,20 +22,20 @@ const User = mongoose.model("User", {
   },
 });
 
-const newUser = new User({
-  firstName: "Amit",
-  lastName: "L",
-  email: "mike@aol.com",
-  password: "password123",
-});
+// const newUser = new User({
+//   firstName: "Amit",
+//   lastName: "L",
+//   email: "mike@aol.com",
+//   password: "password123",
+// });
 
-newUser
-  .save()
-  .then((result) => {
-    console.log(newUser);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+// newUser
+//   .save()
+//   .then((result) => {
+//     console.log(newUser);
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
 
 module.exports = User;
