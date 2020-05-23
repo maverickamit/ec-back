@@ -4,6 +4,8 @@ const express = require("express");
 // const cookieParser = require("cookie-parser");
 // const logger = require("morgan");
 const port = process.env.PORT || 3000;
+require("./src/db/mongoose");
+const User = require("./src/db/models/user");
 
 // const indexRouter = require("./src/routes/index");
 // const usersRouter = require("./src/routes/users");
