@@ -2,25 +2,15 @@ const express = require("express");
 
 const port = process.env.PORT || 3000;
 require("./src/db/mongoose");
-const User = require("./src/db/models/user");
 
 const app = express();
+
+const usersRouter = require("./src/routes/users");
 
 app.use(express.json());
 
 //Creating REST API endpoints
-
-app.post("/users", (req, res) => {
-  const user = new User(req.body);
-  user
-    .save()
-    .then((result) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
-});
+app.use("/users", usersRouter);
 
 //Serving the app on port 3000
 app.listen(port, () => {
