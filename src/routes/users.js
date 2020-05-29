@@ -42,6 +42,39 @@ router.get("/:id", (req, res) => {
     });
 });
 
+//Updating User details
+
+router.patch("/:id", async (req, res) => {
+  const _id = req.params.id;
+  const body = req.body;
+  const allowedUpdates = ["email", "password"];
+  const updatesUsed = Object.keys(body);
+  const isValidOperation = updatesUsed.every((update) => {
+    return allowedUpdates.includes(update);
+  });
+  if (!isValidOperation) {
+    res.status(400).send({ error: "Invalid updates!" });
+  }
+  try {
+    // const user = await User.findByIdAndUpdate(_id, body, {
+    //   new: true,
+    //   runValidators: true,
+    // });
+    const user = await User.findById(_id);
+    updatesUsed.forEach((update) => {
+      user[update] = body[update];
+    });
+    await user.save();
+
+    if (!user) {
+      res.status(404).send();
+    }
+    res.send(user);
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
 //Deleting User
 
 router.delete("/:id", async (req, res) => {
