@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
@@ -22,6 +23,11 @@ const userSchema = mongoose.Schema({
     trim: true,
     minlength: 8,
   },
+  tokens: [
+    {
+      token: { type: String, required: true },
+    },
+  ],
 });
 
 //logging in middleware
@@ -39,7 +45,6 @@ userSchema.statics.findByCredentials = async (email, password) => {
 
   return user;
 };
-
 
 //hashing password
 userSchema.pre("save", async function (next) {
