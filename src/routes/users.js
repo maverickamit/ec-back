@@ -32,14 +32,40 @@ router.post("/login", async (req, res) => {
 // Reading User Endpoint
 //Getting a list of all Users
 
-router.get("/", (req, res) => {
-  User.find({})
-    .then((users) => {
-      res.send(users);
-    })
-    .catch((e) => {
-      res.status(500).send();
+// router.get("/", (req, res) => {
+//   User.find({})
+//     .then((users) => {
+//       res.send(users);
+//     })
+//     .catch((e) => {
+//       res.status(500).send();
+//     });
+// });
+
+//Endpoint for loggin out user from single session
+
+router.post("/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token;
     });
+    await req.user.save();
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
+
+//Endpoint for loggin out user from all sessions
+
+router.post("/logoutAll", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
 });
 
 //Getting particular user details
