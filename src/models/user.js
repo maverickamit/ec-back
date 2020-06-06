@@ -48,9 +48,13 @@ userSchema.statics.findByCredentials = async (email, password) => {
 //middleware for generating authentication token
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id.toString() }, "newprojectforme", {
-    expiresIn: "7 days",
-  });
+  const token = jwt.sign(
+    { _id: user._id.toString() },
+    "everchangetokenverification",
+    {
+      expiresIn: "365 days",
+    }
+  );
 
   user.tokens = user.tokens.concat({ token });
   await user.save();
