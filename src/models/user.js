@@ -60,6 +60,7 @@ userSchema.methods.generateAuthToken = async function () {
   await user.save();
   return token;
 };
+
 //hashing password
 userSchema.pre("save", async function (next) {
   const user = this;
