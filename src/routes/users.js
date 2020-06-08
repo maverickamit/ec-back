@@ -1,6 +1,7 @@
 const express = require("express");
 const router = new express.Router();
 const User = require("../models/user");
+const auth = require("../middleware/auth");
 
 //creating new user endpoint
 router.post("/", async (req, res) => {
@@ -19,7 +20,7 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const user = await User.findByCredentials(
-      req.body.email,
+      req.body.ema
       req.body.password
     );
     const token = await user.generateAuthToken();
