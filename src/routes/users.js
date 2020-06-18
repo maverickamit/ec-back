@@ -31,7 +31,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Reading User Endpoint
-//Getting a list of all Users
+//Getting a list of all U  sers
 
 // router.get("/", (req, res) => {
 //   User.find({})
