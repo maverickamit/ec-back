@@ -4,22 +4,13 @@ const sendgriAPIKey =
 
 sgMail.setApiKey(sendgriAPIKey);
 
-// const msg = {
-//   to: "amitdgpghosh@gmail.com",
-//   from: "amitdgpghosh@gmail.com",
-//   subject: "My first creation!",
-//   text: "How are you?",
-// };
-
-const sendWelcomeEmail = (name, email) => {
+const sendWelcomeEmail = (email, name) => {
   sgMail.send({
     to: email,
-    from: "amitdgpghosh@gmail.com",
-    subject: "Welcome to EverChange",
-    text: `Welcome to the app, ${name}. Please verify your email to continue.`,
+    from: "amit@amit-ghosh.com",
+    subject: "Welcome to EverChange " + name,
+    text: "Please verify your emai to continue",
   });
 };
 
-module.exports = {
-  sendWelcomeEmail,
-};
+module.exports = { sendWelcomeEmail };
