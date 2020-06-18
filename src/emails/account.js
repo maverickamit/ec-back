@@ -4,12 +4,13 @@ const sendgriAPIKey =
 
 sgMail.setApiKey(sendgriAPIKey);
 
-const sendWelcomeEmail = (email, name) => {
+const sendWelcomeEmail = (email, name, token) => {
   sgMail.send({
     to: email,
     from: "amit@amit-ghosh.com",
     subject: "Welcome to EverChange " + name,
-    text: "Please verify your emai to continue",
+    html: `<h2>Please verify your email to continue</h2>. <p>Click on the given link.</p>
+    <a href="http://localhost:3000/users/authenticate/${token}">Verify Email</a>`,
   });
 };
 
