@@ -9,7 +9,7 @@ const sendWelcomeEmail = (email, name, token) => {
     to: email,
     from: "amit@amit-ghosh.com",
     subject: "Welcome to EverChange " + name,
-    html: `<h2>Please verify your email to continue</h2>. <p>Click on the given link.</p>
+    html: `<h2>Please verify your email to continue</h2>. <p>Click on the given link.The link will be valid for 24 hours only.</p>
     <a href="https://everchange-backend.herokuapp.com/users/authenticate/${token}">Verify Email</a>`,
   });
 };
