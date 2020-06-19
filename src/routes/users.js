@@ -122,4 +122,47 @@ router.delete("/me", auth, async (req, res) => {
   }
 });
 
+//Verifying Email
+
+router.get("/authenticate/:token", async (req, res) => {
+  try {
+    const mytoken = req.params.token;
+    const userEmail = jwt.verify(mytoken, "verificationemailec");
+    const user = await User.findOne({
+      email: userEmail.email,
+    });
+    if (user) {
+      res.send(
+        `<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <div className="container">
+          <div className="row">
+            <p class="font-weight-bold" style="padding:20px;font-size:calc(100% + 1vh)" >Your Email is Verified</p>
+            <p  style="padding-left:20px;font-size:calc(100% + 1vh);">Please Click 
+              <a href="https://everchange.herokuapp.com">Here</a> 
+            to continue to login.</p>
+          </div>
+        </div>`
+      );
+    }
+    res.status(500)
+      .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <div className="container">
+          <div className="row">
+            <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Your Email is Verified</p>
+            <p  style="padding-left:20px;font-size:calc(100% + 1vh);">Please Click 
+              <a href="https://everchange.herokuapp.com">Here</a> 
+            to continue to login.</p>
+          </div>
+        </div>`);
+  } catch (e) {
+    res.status(500)
+      .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <div className="container">
+          <div className="row">
+            <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Error in verification.</p>
+          </div>
+        </div>`);
+  }
+});
+
 module.exports = router;
