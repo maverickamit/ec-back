@@ -132,6 +132,9 @@ router.get("/authenticate/:token", async (req, res) => {
       email: userEmail.email,
     });
     if (user) {
+      user.emailVerified = true;
+      await user.save();
+
       res.send(
         `<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <div className="container">
@@ -144,16 +147,6 @@ router.get("/authenticate/:token", async (req, res) => {
         </div>`
       );
     }
-    res.status(500)
-      .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-        <div className="container">
-          <div className="row">
-            <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Your Email is Verified</p>
-            <p  style="padding-left:20px;font-size:calc(100% + 1vh);">Please Click 
-              <a href="https://everchange.herokuapp.com">Here</a> 
-            to continue to login.</p>
-          </div>
-        </div>`);
   } catch (e) {
     res.status(500)
       .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
