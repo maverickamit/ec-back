@@ -58,7 +58,7 @@ userSchema.methods.generateAuthToken = async function () {
     { _id: user._id.toString() },
     "everchangetokenverification",
     {
-      expiresIn: "365 days",
+      expiresIn: "24h",
     }
   );
 
