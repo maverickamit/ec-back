@@ -8,9 +8,11 @@ require("./src/db/mongoose");
 const app = express();
 
 const usersRouter = require("./src/routes/users");
-
+const corsOptions = {
+  preflightContinue: true,
+};
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 //Creating REST API endpoints
 app.use("/users", usersRouter);

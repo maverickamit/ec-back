@@ -21,6 +21,20 @@ router.post("/", async (req, res) => {
     res.status(400).send(err);
   }
 });
+//Endpoint for resend email verification
+router.post("/authenticate", auth, async (req, res) => {
+  try {
+    const user = req.user;
+
+    const emailToken = jwt.sign({ email: user.email }, "verificationemailec", {
+      expiresIn: "24 hours",
+    });
+    sendWelcomeEmail(user.email, user.firstName, emailToken);
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
 
 //Endpoint for logging in user
 
