@@ -3,20 +3,30 @@ const router = new express.Router();
 const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
-const { sendWelcomeEmail, deletedEmail } = require("../emails/account");
-const { getMaxListeners } = require("../models/user");
+const {
+  sendWelcomeEmail,
+  deletedEmail
+} = require("../emails/account");
+const {
+  getMaxListeners
+} = require("../models/user");
 
 //creating new user endpoint
 router.post("/", async (req, res) => {
   const user = new User(req.body);
   try {
     await user.save();
-    const emailToken = jwt.sign({ email: user.email }, "verificationemailec", {
+    const emailToken = jwt.sign({
+      email: user.email
+    }, "verificationemailec", {
       expiresIn: "24 hours",
     });
     sendWelcomeEmail(user.email, user.firstName, emailToken);
     const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
+    res.status(201).send({
+      user,
+      token
+    });
   } catch (err) {
     res.status(400).send(err);
   }
@@ -26,7 +36,9 @@ router.post("/authenticate", auth, async (req, res) => {
   try {
     const user = req.user;
 
-    const emailToken = jwt.sign({ email: user.email }, "verificationemailec", {
+    const emailToken = jwt.sign({
+      email: user.email
+    }, "verificationemailec", {
       expiresIn: "24 hours",
     });
     sendWelcomeEmail(user.email, user.firstName, emailToken);
@@ -45,7 +57,10 @@ router.post("/login", async (req, res) => {
       req.body.password
     );
     const token = await user.generateAuthToken();
-    res.status(200).send({ user, token });
+    res.status(200).send({
+      user,
+      token
+    });
   } catch {
     res.status(404).send();
   }
@@ -107,7 +122,9 @@ router.patch("/me", auth, async (req, res) => {
     return allowedUpdates.includes(update);
   });
   if (!isValidOperation) {
-    res.status(400).send({ error: "Invalid updates!" });
+    res.status(400).send({
+      error: "Invalid updates!"
+    });
   }
   try {
     const user = req.user;
@@ -171,5 +188,7 @@ router.get("/authenticate/:token", async (req, res) => {
         </div>`);
   }
 });
+
+
 
 module.exports = router;

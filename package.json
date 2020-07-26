@@ -20,6 +20,7 @@
     "mongoose": "^5.9.15",
     "morgan": "^1.9.1",
     "nodemailer": "^6.4.10",
+    "plaid": "^6.0.0",
     "pug": "^2.0.4",
     "validator": "^13.0.0"
   },
