@@ -6,9 +6,22 @@ const jwt = require("jsonwebtoken");
 const {
   sendWelcomeEmail
 } = require("../emails/account");
-const {
-  fetchStripeToken
-} = require("../payment/verification");
+
+var plaid = require('plaid');
+require('dotenv').config()
+var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN
+var ACCOUNT_ID = process.env.ACCOUNT_ID
+var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
+var PLAID_SECRET = process.env.PLAID_SECRET
+
+
+const port = process.env.PORT || 3000;
+
+var plaidClient = new plaid.Client({
+  clientID: PLAID_CLIENT_ID,
+  secret: PLAID_SECRET,
+  env: plaid.environments.sandbox
+});
 
 
 //creating new user endpoint
@@ -191,16 +204,32 @@ router.get("/authenticate/:token", async (req, res) => {
 
 //End point for plaid verification
 
-router.post("/plaidverify", auth, async (req, res) => {
-  try {
 
-    var publicToken = req.body.PUBLIC_TOKEN
-    var accountID = req.body.ACCOUNT_ID
-    res.send();
+router.post('/plaidverify', function (request, response, next) {
+  try {
+    var publicToken = request.body.PUBLIC_TOKEN
+    var accountID = request.body.ACCOUNT_ID
+    plaidClient.exchangePublicToken(publicToken, function (error, tokenResponse) {
+      if (error != null) {
+        response.status(400).send()
+
+      } else {
+        var accessToken = tokenResponse.access_token;
+        plaidClient.createStripeToken(accessToken, accountID, function (err, res) {
+          var bankAccountToken = res.stripe_bank_account_token;
+          console.log(bankAccountToken);
+          console.log(accessToken);
+
+        })
+        response.send()
+      }
+    })
   } catch {
-    res.status(500).send();
+    response.status(500).send()
   }
 });
+
+
 
 
 
