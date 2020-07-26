@@ -4,12 +4,13 @@ const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const {
-  sendWelcomeEmail,
-  deletedEmail
+  sendWelcomeEmail
 } = require("../emails/account");
 const {
-  getMaxListeners
-} = require("../models/user");
+  fetchStripeToken
+} = require("../payment/verification");
+
+fetchStripeToken()
 
 //creating new user endpoint
 router.post("/", async (req, res) => {

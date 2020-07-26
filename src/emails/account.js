@@ -14,4 +14,6 @@ const sendWelcomeEmail = (email, name, token) => {
   });
 };
 
-module.exports = { sendWelcomeEmail };
+module.exports = {
+  sendWelcomeEmail
+};
