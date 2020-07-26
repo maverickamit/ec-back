@@ -10,7 +10,6 @@ const {
   fetchStripeToken
 } = require("../payment/verification");
 
-fetchStripeToken()
 
 //creating new user endpoint
 router.post("/", async (req, res) => {
@@ -187,6 +186,19 @@ router.get("/authenticate/:token", async (req, res) => {
             <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Error in verification.</p>
           </div>
         </div>`);
+  }
+});
+
+//End point for plaid verification
+
+router.post("/plaidverify", auth, async (req, res) => {
+  try {
+
+    var publicToken = req.body.PUBLIC_TOKEN
+    var accountID = req.body.ACCOUNT_ID
+    res.send();
+  } catch {
+    res.status(500).send();
   }
 });
 

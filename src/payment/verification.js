@@ -34,8 +34,6 @@ const fetchStripeToken = () => {
 }
 
 
-console.log(PLAID_CLIENT_ID)
-
 
 
 module.exports = {
