@@ -2,11 +2,21 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Binary } = require("mongodb");
+const {
+  Binary
+} = require("mongodb");
 
 const userSchema = mongoose.Schema({
-  firstName: { type: String, required: true, trim: true },
-  lastName: { type: String, required: true, trim: true },
+  firstName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true
+  },
   email: {
     type: String,
     required: true,
@@ -29,16 +39,29 @@ const userSchema = mongoose.Schema({
     required: true,
     default: false,
   },
-  tokens: [
-    {
-      token: { type: String, required: true },
+  bankLinked: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  stripeCustomerId: {
+    type: String,
+    required: false,
+
+  },
+  tokens: [{
+    token: {
+      type: String,
+      required: true
     },
-  ],
+  }, ],
 });
 
 //logging in middleware
 userSchema.statics.findByCredentials = async (email, password) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({
+    email
+  });
   if (!user) {
     throw new Error("Unable to login");
   }
@@ -54,15 +77,17 @@ userSchema.statics.findByCredentials = async (email, password) => {
 //middleware for generating authentication token
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
-  const token = jwt.sign(
-    { _id: user._id.toString() },
-    "everchangetokenverification",
-    {
+  const token = jwt.sign({
+      _id: user._id.toString()
+    },
+    "everchangetokenverification", {
       expiresIn: "24h",
     }
   );
 
-  user.tokens = user.tokens.concat({ token });
+  user.tokens = user.tokens.concat({
+    token
+  });
   await user.save();
   return token;
 };
