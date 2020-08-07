@@ -23,6 +23,7 @@
     "nodemailer": "^6.4.10",
     "plaid": "^6.0.0",
     "pug": "^2.0.4",
+    "stripe": "^8.83.0",
     "validator": "^13.0.0"
   },
   "devDependencies": {
