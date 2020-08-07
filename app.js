@@ -12,9 +12,14 @@ require("./src/db/mongoose");
 const app = express();
 
 const usersRouter = require("./src/routes/users");
-app.use(cors());
-
+var corsOptions = {
+  origin: 'https://everchange.herokuapp.com',
+  optionsSuccessStatus: 200,
+  preflightContinue: true,
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE"
+}
 app.use(express.json());
+app.use(cors(corsOptions));
 
 
 //Creating REST API endpoints
