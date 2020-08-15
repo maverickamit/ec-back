@@ -3,61 +3,73 @@ const router = new express.Router();
 const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
-const {
-  sendWelcomeEmail
-} = require("../emails/account");
+const { sendWelcomeEmail } = require("../emails/account");
+const multer = require("multer");
 
+require("dotenv").config();
+var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
+var ACCOUNT_ID = process.env.ACCOUNT_ID;
+var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+var PLAID_SECRET = process.env.PLAID_SECRET;
+var STRIPE_KEY = process.env.STRIPE_KEY;
 
-
-require('dotenv').config()
-var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN
-var ACCOUNT_ID = process.env.ACCOUNT_ID
-var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
-var PLAID_SECRET = process.env.PLAID_SECRET
-var STRIPE_KEY = process.env.STRIPE_KEY
-
-var plaid = require('plaid');
-var stripe = require('stripe')(STRIPE_KEY);
+var plaid = require("plaid");
+var stripe = require("stripe")(STRIPE_KEY);
 
 const port = process.env.PORT || 3000;
 
 var plaidClient = new plaid.Client({
   clientID: PLAID_CLIENT_ID,
   secret: PLAID_SECRET,
-  env: plaid.environments.sandbox
+  env: plaid.environments.sandbox,
 });
-
 
 //creating new user endpoint
 router.post("/", async (req, res) => {
   const user = new User(req.body);
   try {
     await user.save();
-    const emailToken = jwt.sign({
-      email: user.email
-    }, "verificationemailec", {
-      expiresIn: "24 hours",
-    });
+    const emailToken = jwt.sign(
+      {
+        email: user.email,
+      },
+      "verificationemailec",
+      {
+        expiresIn: "24 hours",
+      }
+    );
     sendWelcomeEmail(user.email, user.firstName, emailToken);
     const token = await user.generateAuthToken();
     res.status(201).send({
       user,
-      token
+      token,
     });
   } catch (err) {
     res.status(400).send(err);
   }
 });
+
+const upload = multer({});
+
+// Endpoint for setting avatar for user(profile picture)
+router.post("/me/avatar", upload.single("avatar"), (req, res) => {
+  res.send();
+});
+
 //Endpoint for resend email verification
 router.post("/authenticate", auth, async (req, res) => {
   try {
     const user = req.user;
 
-    const emailToken = jwt.sign({
-      email: user.email
-    }, "verificationemailec", {
-      expiresIn: "24 hours",
-    });
+    const emailToken = jwt.sign(
+      {
+        email: user.email,
+      },
+      "verificationemailec",
+      {
+        expiresIn: "24 hours",
+      }
+    );
     sendWelcomeEmail(user.email, user.firstName, emailToken);
     res.send();
   } catch {
@@ -76,7 +88,7 @@ router.post("/login", async (req, res) => {
     const token = await user.generateAuthToken();
     res.status(200).send({
       user,
-      token
+      token,
     });
   } catch (e) {
     res.status(404).send("Error: " + e);
@@ -140,7 +152,7 @@ router.patch("/me", auth, async (req, res) => {
   });
   if (!isValidOperation) {
     res.status(400).send({
-      error: "Invalid updates!"
+      error: "Invalid updates!",
     });
   }
   try {
@@ -208,50 +220,51 @@ router.get("/authenticate/:token", async (req, res) => {
 
 //End point for plaid verification first time linking bank account
 
-router.post('/plaidverify', function (request, response, next) {
+router.post("/plaidverify", function (request, response, next) {
   try {
-    var publicToken = request.body.PUBLIC_TOKEN
-    var accountID = request.body.ACCOUNT_ID
-    plaidClient.exchangePublicToken(publicToken, function (error, tokenResponse) {
+    var publicToken = request.body.PUBLIC_TOKEN;
+    var accountID = request.body.ACCOUNT_ID;
+    plaidClient.exchangePublicToken(publicToken, function (
+      error,
+      tokenResponse
+    ) {
       if (error != null) {
-        response.status(400).send()
-
+        response.status(400).send();
       } else {
         var accessToken = tokenResponse.access_token;
-        plaidClient.createStripeToken(accessToken, accountID, function (err, res) {
+        plaidClient.createStripeToken(accessToken, accountID, function (
+          err,
+          res
+        ) {
           if (error != null || res == undefined) {
-            response.status(400).send()
-
+            response.status(400).send();
           } else {
             var bankAccountToken = res.stripe_bank_account_token;
 
             //Creating a Stripe customer object when linking bank account for first time
-            stripe.customers.create({
-                description: 'Test Customer (created for API docs)',
-                source: bankAccountToken
+            stripe.customers.create(
+              {
+                description: "Test Customer (created for API docs)",
+                source: bankAccountToken,
               },
               function (err, customer) {
                 if (err) {
-                  response.status(400).send()
+                  response.status(400).send();
                 }
                 response.send({
                   bankAccountToken,
                   accessToken,
-                  customer
-                })
+                  customer,
+                });
               }
             );
           }
-        })
+        });
       }
-    })
+    });
   } catch {
-    response.status(500).send()
+    response.status(500).send();
   }
 });
-
-
-
-
 
 module.exports = router;
