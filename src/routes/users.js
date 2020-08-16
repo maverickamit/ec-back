@@ -49,7 +49,19 @@ router.post("/", async (req, res) => {
   }
 });
 
-const upload = multer({});
+const upload = multer({
+  dest: "avatars",
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpeg|jpg|png)$/)) {
+      cb(new Error("File must be an image"));
+    }
+
+    cb(undefined, true);
+  },
+});
 
 // Endpoint for setting avatar for user(profile picture)
 router.post("/me/avatar", upload.single("avatar"), (req, res) => {
