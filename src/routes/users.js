@@ -50,7 +50,6 @@ router.post("/", async (req, res) => {
 });
 
 const upload = multer({
-  dest: "avatars",
   limits: {
     fileSize: 1000000,
   },
@@ -67,7 +66,10 @@ const upload = multer({
 router.post(
   "/me/avatar",
   upload.single("avatar"),
-  (req, res) => {
+  auth,
+  async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
     res.send();
   },
   (error, req, res, next) => {
