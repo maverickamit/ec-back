@@ -11,7 +11,7 @@ const app = express();
 
 const usersRouter = require("./src/routes/users");
 var corsOptions = {
-  origin: "*",
+  origin: "https://everchange.herokuapp.com",
   optionsSuccessStatus: 200,
   preflightContinue: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
