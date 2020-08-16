@@ -5,6 +5,7 @@ const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
 const multer = require("multer");
+const sharp = require("sharp");
 
 require("dotenv").config();
 var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
@@ -65,10 +66,14 @@ const upload = multer({
 // Endpoint for setting avatar for user(profile picture)
 router.post(
   "/me/avatar",
-  upload.single("avatar"),
   auth,
+  upload.single("avatar"),
   async (req, res) => {
-    req.user.avatar = req.file.buffer;
+    const buffer = await sharp(req.file.buffer)
+      .resize({ width: 380, height: 380 })
+      .png()
+      .toBuffer();
+    req.user.avatar = buffer;
     await req.user.save();
     res.send();
   },
@@ -91,7 +96,7 @@ router.get("/:id/avatar", async (req, res) => {
     if (!user || !user.avatar) {
       throw new Error();
     }
-    res.set("Content-Type", "image/jpg");
+    res.set("Content-Type", "image/png");
     res.send(user.avatar);
   } catch (e) {
     res.status(404).send();
