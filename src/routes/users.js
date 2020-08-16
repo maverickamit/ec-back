@@ -64,9 +64,16 @@ const upload = multer({
 });
 
 // Endpoint for setting avatar for user(profile picture)
-router.post("/me/avatar", upload.single("avatar"), (req, res) => {
-  res.send();
-});
+router.post(
+  "/me/avatar",
+  upload.single("avatar"),
+  (req, res) => {
+    res.send();
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
 //Endpoint for resend email verification
 router.post("/authenticate", auth, async (req, res) => {
