@@ -77,6 +77,13 @@ router.post(
   }
 );
 
+// Endpoint for deleting avatar for user(profile picture)
+router.delete("/me/avatar", auth, async (req, res) => {
+  req.user.avatar = undefined;
+  await req.user.save();
+  res.send();
+});
+
 //Endpoint for resend email verification
 router.post("/authenticate", auth, async (req, res) => {
   try {
