@@ -1,4 +1,4 @@
-//All routes related to stripe and plaid
+//All routes related to stripe and plaid {/users/banking}
 
 const express = require("express");
 const router = new express.Router();
@@ -27,7 +27,7 @@ var plaidClient = new plaid.Client({
 
 // End point for plaid verification first time linking bank account
 
-router.post("/plaidverify", function (request, response, next) {
+router.post("/plaidverify", auth, function (request, response, next) {
   try {
     var publicToken = request.body.PUBLIC_TOKEN;
     var accountID = request.body.ACCOUNT_ID;
@@ -58,11 +58,9 @@ router.post("/plaidverify", function (request, response, next) {
                 if (err) {
                   response.status(400).send();
                 }
-                response.send({
-                  bankAccountToken,
-                  accessToken,
-                  customer,
-                });
+                request.user.bankLinked = true;
+                request.user.save();
+                response.send();
               }
             );
           }
@@ -74,12 +72,6 @@ router.post("/plaidverify", function (request, response, next) {
   }
 });
 
-router.get("/123/avatar", (req, res) => {
-  try {
-    res.send("hello world");
-  } catch (e) {
-    res.status(404).send();
-  }
-});
+//Updating Plaid Bank account linking status
 
 module.exports = router;
