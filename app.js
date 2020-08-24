@@ -10,8 +10,9 @@ require("./src/db/mongoose");
 const app = express();
 
 const usersRouter = require("./src/routes/users");
+const bankingRouter = require("./src/routes/banking");
 var corsOptions = {
-  origin: "https://everchange.herokuapp.com",
+  origin: process.env.CLIENT_APP_URL,
   optionsSuccessStatus: 200,
   preflightContinue: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -21,6 +22,7 @@ app.use(cors(corsOptions));
 
 //Creating REST API endpoints
 app.use("/users", usersRouter);
+app.use("/users/banking", bankingRouter);
 
 //Serving the app on port 3000
 app.listen(port, () => {
