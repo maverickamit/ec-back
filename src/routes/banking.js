@@ -59,6 +59,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
                   response.status(400).send();
                 }
                 request.user.bankLinked = true;
+                request.user.stripeCustomerId = customer.id;
                 request.user.save();
                 response.send();
               }
