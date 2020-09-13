@@ -18,7 +18,7 @@ var STRIPE_KEY = process.env.STRIPE_KEY;
 
 var plaid = require("plaid");
 var stripe = require("stripe")(STRIPE_KEY);
-
+var accessToken = null || process.env.ACCESS_TOKEN;
 var plaidClient = new plaid.Client({
   clientID: PLAID_CLIENT_ID,
   secret: PLAID_SECRET,
@@ -38,7 +38,9 @@ router.post("/plaidverify", auth, function (request, response, next) {
       if (error != null) {
         response.status(400).send();
       } else {
-        var accessToken = tokenResponse.access_token;
+        accessToken = tokenResponse.access_token;
+        console.log("access token is " + accessToken);
+
         plaidClient.createStripeToken(accessToken, accountID, function (
           err,
           res
@@ -73,6 +75,21 @@ router.post("/plaidverify", auth, function (request, response, next) {
   }
 });
 
-//Updating Plaid Bank account linking status
+// Retrieve real-time Balances for each of an Item's accounts
+router.get("/api/balance", function (req, res, next) {
+  plaidClient.getBalance(req.body.ACCESS_TOKEN, function (
+    error,
+    balanceResponse
+  ) {
+    if (error != null) {
+      console.log(error);
+      return res.send({
+        error: error,
+      });
+    }
+    res.send(balanceResponse);
+  });
+});
 
+//Updating Plaid Bank account linking status
 module.exports = router;
