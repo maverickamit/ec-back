@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
 const multer = require("multer");
 const sharp = require("sharp");
+var moment = require("moment");
 
 require("dotenv").config();
 var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
@@ -89,6 +90,31 @@ router.get("/api/balance", function (req, res, next) {
     }
     res.send(balanceResponse);
   });
+});
+
+// Retrieve Transactions for an Item
+router.get("/api/transactions", function (req, res, next) {
+  // Pull transactions for the Item for the last 30 days
+  var startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
+  var endDate = moment().format("YYYY-MM-DD");
+  plaidClient.getTransactions(
+    accessToken,
+    startDate,
+    endDate,
+    {
+      count: 250,
+      offset: 0,
+    },
+    function (error, transactionsResponse) {
+      if (error != null) {
+        return res.send({
+          error: error,
+        });
+      } else {
+        res.send(transactionsResponse);
+      }
+    }
+  );
 });
 
 //Updating Plaid Bank account linking status
