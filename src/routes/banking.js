@@ -77,7 +77,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
 });
 
 // Retrieve real-time Balances for each of an Item's accounts
-router.get("/api/balance", function (req, res, next) {
+router.get("/api/balance", auth, function (req, res, next) {
   plaidClient.getBalance(req.body.ACCESS_TOKEN, function (
     error,
     balanceResponse
@@ -93,7 +93,7 @@ router.get("/api/balance", function (req, res, next) {
 });
 
 // Retrieve Transactions for an Item
-router.get("/api/transactions", function (req, res, next) {
+router.get("/api/transactions", auth, function (req, res, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
