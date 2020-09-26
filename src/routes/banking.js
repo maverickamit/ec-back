@@ -91,7 +91,8 @@ router.get("/api/balance", auth, function (req, res, next) {
     res.send(balanceResponse);
   });
 });
-// Retrieve Transactions for an Item
+
+// Retrieve Transactions for an Item and sending the total amount to be charged through Stripe
 router.get("/api/transactions", auth, function (req, res, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment().subtract(30, "days").format("YYYY-MM-DD");

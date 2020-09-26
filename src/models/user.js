@@ -50,6 +50,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+  plaidToken: {
+    type: String,
+    required: false,
+  },
   tokens: [
     {
       token: {
