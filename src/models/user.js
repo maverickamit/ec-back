@@ -32,6 +32,10 @@ const userSchema = mongoose.Schema({
     trim: true,
     minlength: 8,
   },
+  billingAddress: {
+    type: String,
+    required: false,
+  },
   emailVerified: {
     type: Boolean,
     required: true,
