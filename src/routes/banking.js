@@ -91,7 +91,6 @@ router.get("/api/balance", auth, function (req, res, next) {
     res.send(balanceResponse);
   });
 });
-
 // Retrieve Transactions for an Item
 router.get("/api/transactions", auth, function (req, res, next) {
   // Pull transactions for the Item for the last 30 days
@@ -111,7 +110,15 @@ router.get("/api/transactions", auth, function (req, res, next) {
           error: error,
         });
       } else {
-        res.send(transactionsResponse);
+        let transactionsDetails = transactionsResponse.transactions;
+        let amountCharged = 0;
+        transactionsDetails.map((item) => {
+          let roundingup = Math.ceil(item["amount"]) - item["amount"];
+          amountCharged += roundingup;
+        });
+        res.send({
+          total: amountCharged.toFixed(2),
+        });
       }
     }
   );
