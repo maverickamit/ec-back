@@ -39,8 +39,10 @@ router.post("/plaidverify", auth, function (request, response, next) {
       if (error != null) {
         response.status(400).send();
       } else {
+        //Saving plaid access token server side
         accessToken = tokenResponse.access_token;
-        console.log("access token is " + accessToken);
+        request.user.plaidToken = accessToken;
+        request.user.save();
 
         plaidClient.createStripeToken(accessToken, accountID, function (
           err,
