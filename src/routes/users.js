@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
 const multer = require("multer");
 const sharp = require("sharp");
+const bcrypt = require("bcryptjs");
 
 require("dotenv").config();
 
@@ -180,6 +181,7 @@ router.patch("/me", auth, async (req, res) => {
   const allowedUpdates = [
     "email",
     "password",
+    "oldPassword",
     "firstName",
     "lastName",
     "billingAddress",
@@ -188,6 +190,24 @@ router.patch("/me", auth, async (req, res) => {
   const isValidOperation = updatesUsed.every((update) => {
     return allowedUpdates.includes(update);
   });
+
+  //checking if provided old password is correct before updating
+
+  try {
+    const user = req.user;
+    const isPassWordValid = await bcrypt.compare(
+      body.oldPassword,
+      user.password
+    );
+    if (!isPassWordValid) {
+      res.status(400).send({
+        error: "Invalid Password!",
+      });
+    }
+  } catch (e) {
+    res.status(500).send(e);
+  }
+
   if (!isValidOperation) {
     res.status(400).send({
       error: "Invalid updates!",
