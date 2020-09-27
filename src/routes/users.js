@@ -216,7 +216,10 @@ router.patch("/me", auth, async (req, res) => {
   try {
     const user = req.user;
     updatesUsed.forEach((update) => {
-      user[update] = body[update];
+      if (body[update] !== "") {
+        console.log(body[update]);
+        user[update] = body[update];
+      }
     });
     await user.save();
 
