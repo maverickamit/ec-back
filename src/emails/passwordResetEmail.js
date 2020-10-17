@@ -1,7 +1,7 @@
 const sgMail = require("@sendgrid/mail");
 require("dotenv").config();
 var SENDGRID_KEY = process.env.SENDGRID_KEY;
-
+var API_BASEURL = process.env.API_BASEURL
 sgMail.setApiKey(SENDGRID_KEY);
 
 const sendPasswordResetEmail = (email, name, token) => {
@@ -131,7 +131,7 @@ const sendPasswordResetEmail = (email, name, token) => {
             <tbody>
               <tr>
               <td align="center" bgcolor="#ffbe00" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                <a href="https://everchange-backend.herokuapp.com/users/forgetPassword/reset/${token}" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Reset Password</a>
+                <a href="${API_BASEURL}/users/forgetPassword/reset/${token}" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Reset Password</a>
               </td>
               </tr>
             </tbody>
