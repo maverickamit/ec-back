@@ -305,5 +305,27 @@ router.post("/forgotPassword", async (req, res) => {
     res.status(500).send();
   }
 });
+//Endpoint for handling password reset url
+router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user){
+      throw new Error()
+    }
+    const secret = user.password+"-forgotpasswordec"
+    const resetToken = jwt.decode(
+      req.params.token, secret
+    );
+    res.send();
+  } catch(e) {
+    res.status(500)
+    .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+      <div className="container">
+        <div className="row">
+          <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Error in verification.</p>
+        </div>
+      </div>`);
+  }
+});
 
 module.exports = router;
