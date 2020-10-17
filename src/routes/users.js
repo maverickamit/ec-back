@@ -395,4 +395,14 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
   }
 });
 
+//Route to handle reset password submit form
+router.post("/forgotPassword/reset", async (req, res) => {
+  try {
+    console.log("Password have been reset")
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
+
 module.exports = router;
