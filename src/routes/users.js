@@ -279,4 +279,29 @@ router.get("/authenticate/:token", async (req, res) => {
   }
 });
 
+
+//Endpoint for handling forgot password
+router.post("/forgotPassword", async (req, res) => {
+  try {
+    const email = req.body.email
+    const user = await User.findOne({
+      email: email,
+    });
+    const resetToken = jwt.sign(
+      {
+        _id:user._id,
+        email: user.email,
+      },
+      user.password+"-forgotpasswordec",
+      {
+        expiresIn: "24 hours",
+      }
+    );
+    sendPasswordResetEmail(user.email, user.firstName, resetToken);
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
+
 module.exports = router;
