@@ -5,6 +5,8 @@ const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
+const { sendPasswordResetEmail } = require("../emails/passwordResetEmail");
+
 const multer = require("multer");
 const sharp = require("sharp");
 const bcrypt = require("bcryptjs");
