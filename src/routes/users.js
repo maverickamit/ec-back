@@ -299,7 +299,7 @@ router.post("/forgotPassword", async (req, res) => {
         expiresIn: "24 hours",
       }
     );
-    sendPasswordResetEmail(user.email, user.firstName, resetToken);
+    sendPasswordResetEmail(user.email, user._id, resetToken);
     res.send();
   } catch {
     res.status(500).send();

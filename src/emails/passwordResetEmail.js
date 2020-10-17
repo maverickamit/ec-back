@@ -4,11 +4,11 @@ var SENDGRID_KEY = process.env.SENDGRID_KEY;
 var API_BASEURL = process.env.API_BASEURL
 sgMail.setApiKey(SENDGRID_KEY);
 
-const sendPasswordResetEmail = (email, name, token) => {
+const sendPasswordResetEmail = (email, id, token) => {
   sgMail.send({
     to: email,
     from: "amitdgpghosh@gmail.com",
-    subject: "Reset password request from "+ name,
+    subject: "Reset password request",
     html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml"><head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
@@ -131,7 +131,7 @@ const sendPasswordResetEmail = (email, name, token) => {
             <tbody>
               <tr>
               <td align="center" bgcolor="#ffbe00" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                <a href="${API_BASEURL}/users/forgetPassword/reset/${token}" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Reset Password</a>
+                <a href="${API_BASEURL}/users/forgetPassword/reset/${id}/${token}" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Reset Password</a>
               </td>
               </tr>
             </tbody>
