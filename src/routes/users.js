@@ -313,10 +313,10 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
     if (!user){
       throw new Error()
     }
-    const secret = user.password+"-forgotpasswordec"
-    const resetToken = jwt.decode(
-      req.params.token, secret
-    );
+    // const secret = user.password+"-forgotpasswordec"
+    // const resetToken = jwt.decode(
+    //   req.params.token, secret
+    // );
     res.send(
       `<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
@@ -378,6 +378,12 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
                 <label for="exampleInputEmail1">Retype new password</label>
                 <input type="password" class="form-control form-control-sm" placeholder="" name="pw2">
               </div>
+              <div class="form-group">
+              <input type="hidden" name="id" value="${req.params.id}">
+            </div>
+            <div class="form-group">
+              <input type="hidden" name="token" value="${req.params.token}">
+            </div>
               <button type="submit" class="btn btn-primary btn-block">Reset</button>
             </form>
           </div>
