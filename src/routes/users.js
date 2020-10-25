@@ -5,7 +5,7 @@ const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
-const { sendPasswordResetEmail } = require("../emails/passwordResetEmail");
+const { sendPasswordResetEmail,sendSuccessfulResetEmail } = require("../emails/passwordResetEmail");
 
 const multer = require("multer");
 const sharp = require("sharp");
@@ -414,6 +414,7 @@ router.post("/forgotPassword/reset", async (req, res) => {
     );
     user.password = req.body.pw
     await user.save();
+    sendSuccessfulResetEmail(user.email, user.firstName);
 
     res.send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <div className="container">
