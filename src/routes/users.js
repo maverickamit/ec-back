@@ -404,6 +404,17 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
 //Route to handle reset password submit form
 router.post("/forgotPassword/reset", async (req, res) => {
   try {
+    const user = await User.findById(req.body.id);
+    if (!user){
+      throw new Error()
+    }
+    const secret = user.password+"-forgotpasswordec"
+    const payload = jwt.verify(
+      req.body.token, secret
+    );
+    user.password = req.body.pw
+    await user.save();
+
     res.send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <div className="container">
       <div className="row">
