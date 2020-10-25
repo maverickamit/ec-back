@@ -404,10 +404,24 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
 //Route to handle reset password submit form
 router.post("/forgotPassword/reset", async (req, res) => {
   try {
-    console.log(req.body)
-    res.send();
-  } catch {
-    res.status(500).send();
+    res.send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <div className="container">
+      <div className="row">
+        <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Password changed successfully.</p>
+        <p  style="padding-left:20px;font-size:calc(100% + 1vh);">Please click 
+        <a href="https://everchange.herokuapp.com">here</a> 
+      to continue to login.</p>
+      </div>
+    </div>`);
+  } catch{
+    res.status(500).send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <div className="container">
+      <div className="row">
+        <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >There has been an error.</p>
+        <p  style="padding-left:20px;font-size:calc(100% + 1vh);">Please retry again 
+        <a href="https://everchange.herokuapp.com/forgot-password">here</a>.</p>
+      </div>
+    </div>`);
   }
 });
 
