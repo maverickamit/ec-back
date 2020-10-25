@@ -372,11 +372,11 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
             pw.setCustomValidity(pw.value.length <8 ? "Please increase length of your password" : "")'>
               <div class="form-group">
                 <label for="exampleInputEmail1">Enter new password</label>
-                <input type="password" class="form-control form-control-sm" required name=pw placeholder="Greater than or equal to 8 characters">
+                <input type="password" class="form-control form-control-sm" required name="pw" placeholder="Greater than or equal to 8 characters">
               </div>
               <div class="form-group">
                 <label for="exampleInputEmail1">Retype new password</label>
-                <input type="password" class="form-control form-control-sm" placeholder="" name=pw2>
+                <input type="password" class="form-control form-control-sm" placeholder="" name="pw2">
               </div>
               <button type="submit" class="btn btn-primary btn-block">Reset</button>
             </form>
@@ -398,7 +398,7 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
 //Route to handle reset password submit form
 router.post("/forgotPassword/reset", async (req, res) => {
   try {
-    console.log("Password have been reset")
+    console.log(req.body)
     res.send();
   } catch {
     res.status(500).send();
