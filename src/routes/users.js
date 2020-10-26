@@ -318,22 +318,17 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
     //   req.params.token, secret
     // );
     res.send(
-      `<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
-      <style>html,body { height: 100%; }
+      `<html>
+      <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
       
-        body{
-          display: -ms-flexbox;
-          display: -webkit-box;
-          display: flex;
-          -ms-flex-align: center;
-          -ms-flex-pack: center;
-          -webkit-box-align: center;
-          align-items: center;
-          -webkit-box-pack: center;
-          justify-content: center;
-          background-color: #f5f5f5;
-        }
+      <style>html,body { height: 100%; }
+            
+      
         
         form{
           padding-top: 10px;
@@ -341,18 +336,13 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
           margin-top: 30px;
         }
         
-        .card-title{ font-weight:300; }
-        
+        .card-title{ font-weight:300;
+          text-align: center;
+          padding-top: 20px; }
         .btn{
           font-size: 14px;
           margin-top:20px;
         }
-        
-        .login-form{ 
-          width:320px;
-          margin:20px;
-        }
-        
         .sign-up{
           text-align:center;
           padding:20px 0 0;
@@ -360,35 +350,60 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
         
         span{
           font-size:14px;
-        }</style>
+        }
+        
+        /* Medium devices (landscape tablets, 768px and up) */
+      @media only screen and (min-width: 768px) {
+        .container{
+          width: 50vw;
+        }
+      }
       
-        <div class="card login-form">
-        <div class="card-body">
-          <h3 class="card-title text-center">Reset password</h3>
-          
-          <div class="card-text">
-            <form action="/users/forgotPassword/reset" method="POST"
-            oninput='pw2.setCustomValidity(pw2.value != pw.value ? "Passwords do not match." : "");
-            pw.setCustomValidity(pw.value.length <8 ? "Please increase length of your password" : "")'>
-              <div class="form-group">
+      /* Large devices (laptops/desktops, 992px and up) */
+      @media only screen and (min-width: 992px) {.container{
+          width: 40vw;
+        }}
+      
+      /* Extra large devices (large laptops and desktops, 1200px and up) */
+      @media only screen and (min-width: 1200px) {
+        .container{
+          width: 30vw;
+        }
+      }</style>
+      </head>
+      <body>
+      
+      <h2 class="card-title">Reset password</h2>
+      
+      <div class="container">
+        <form class="login-form" action="/users/forgotPassword/reset" method="POST" oninput='pw2.setCustomValidity(pw2.value != pw.value ? "Passwords do not match." : "");
+        pw.setCustomValidity(pw.value.length <8 ? "Please increase length of your password" : "")'>
+          <div class="col">
+            <div class="form-group">
                 <label for="exampleInputEmail1">Enter new password</label>
-                <input type="password" class="form-control form-control-sm" required name="pw" placeholder="Greater than or equal to 8 characters">
+                <input type="password" class="form-control form-control" required name="pw" placeholder="Greater than or equal to 8 characters">
               </div>
               <div class="form-group">
                 <label for="exampleInputEmail1">Retype new password</label>
-                <input type="password" class="form-control form-control-sm" placeholder="" name="pw2">
+                <input type="password" class="form-control form-control" placeholder="" name="pw2">
               </div>
               <div class="form-group">
-              <input type="hidden" name="id" value="${req.params.id}">
-            </div>
-            <div class="form-group">
-              <input type="hidden" name="token" value="${req.params.token}">
-            </div>
-              <button type="submit" class="btn btn-primary btn-block">Reset</button>
-            </form>
+                <input type="hidden" name="id" value="${req.params.id}">
+              </div>
+              <div class="form-group">
+                <input type="hidden" name="token" value="${req.params.token}">
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block">Reset</button>
+              </div>
           </div>
-        </div>
-      </div>`
+          </div>
+        </form>
+      </div>
+      
+      </body>
+      </html>
+      `
 );
   } catch(e) {
     res.status(500)
