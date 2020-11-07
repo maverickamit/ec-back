@@ -148,7 +148,7 @@ router.get("/api/transactions", auth, function (req, res, next) {
 
 //Function to Charge each user through Stripe
 chargingUsers = async () =>{
-  let users = await User.find()
+  let users = await User.find({bankLinked:true})
   users.map(async(user) => {
      await stripe.charges.create({
       amount: await amountToCharge(user),
