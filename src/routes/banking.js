@@ -146,5 +146,17 @@ router.get("/api/transactions", auth, function (req, res, next) {
   return Math.floor(amountCharged.toFixed(2)*100);
 }
 
+//Function to Charge each user through Stripe
+chargingUsers = async () =>{
+  let users = await User.find()
+  users.map(async(user) => {
+     await stripe.charges.create({
+      amount: await getBalance(user),
+      currency: 'usd',
+      customer: user.stripeCustomerId
+   })
+   })
+}
+
 //Updating Plaid Bank account linking status
 module.exports = router;
