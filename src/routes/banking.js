@@ -9,6 +9,7 @@ const { sendWelcomeEmail } = require("../emails/account");
 const multer = require("multer");
 const sharp = require("sharp");
 var moment = require("moment");
+var schedule = require('node-schedule');
 
 require("dotenv").config();
 var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
@@ -78,9 +79,9 @@ router.post("/plaidverify", auth, function (request, response, next) {
   }
 });
 
-// Retrieve real-time Balances for each of an Item's accounts
+// Endpoint to retrieve real-time Balances for each of an Item's accounts
 router.get("/api/balance", auth, function (req, res, next) {
-  plaidClient.getBalance(req.body.ACCESS_TOKEN, function (
+  plaidClient.getBalance(req.user.plaidToken, function (
     error,
     balanceResponse
   ) {
@@ -94,13 +95,13 @@ router.get("/api/balance", auth, function (req, res, next) {
   });
 });
 
-// Retrieve Transactions for an Item and sending the total amount to be charged through Stripe
+//Endpoint to retrieve Transactions for an Item and sending the total amount to be charged through Stripe
 router.get("/api/transactions", auth, function (req, res, next) {
   // Pull transactions for the Item for the last 30 days
   var startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
   plaidClient.getTransactions(
-    accessToken,
+    req.user.plaidToken,
     startDate,
     endDate,
     {
@@ -126,6 +127,24 @@ router.get("/api/transactions", auth, function (req, res, next) {
     }
   );
 });
+
+// Function to retrieve Transactions for an user and sending the total amount to be charged through Stripe
+ async function amountToCharge (user) {
+  // Pull transactions for the Item for the last 7 days i.e. from previous sunday to saturday
+  var startDate = moment().subtract(7, "days").format("YYYY-MM-DD");
+  var endDate = moment().subtract(1, "days").format("YYYY-MM-DD");
+  const response = await plaidClient
+  .getTransactions(user.plaidToken,startDate, endDate, {})
+  .catch((err) => {
+    console.log("Error: "+ err)
+  });
+  const transactionsDetails = response.transactions;
+  let amountCharged = 0;
+  transactionsDetails.map((item) => {
+  let roundingup = Math.ceil(item["amount"]) - item["amount"];
+  amountCharged += roundingup;});
+  return Math.floor(amountCharged.toFixed(2)*100);
+}
 
 //Updating Plaid Bank account linking status
 module.exports = router;
