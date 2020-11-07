@@ -151,12 +151,17 @@ chargingUsers = async () =>{
   let users = await User.find()
   users.map(async(user) => {
      await stripe.charges.create({
-      amount: await getBalance(user),
+      amount: await amountToCharge(user),
       currency: 'usd',
       customer: user.stripeCustomerId
    })
    })
 }
+
+//recurrent function to run every sunday at 00:05 AM
+var recurrentFunction = schedule.scheduleJob({hour: 00, minute: 5, dayOfWeek: 0}, function(){
+  chargingUsers()
+});
 
 //Updating Plaid Bank account linking status
 module.exports = router;
