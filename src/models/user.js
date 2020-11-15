@@ -65,6 +65,23 @@ const userSchema = mongoose.Schema({
   avatar: {
     type: Buffer,
   },
+  amountsCharged: [
+    {
+      amount: {
+        type: Number,
+        required: true,
+      },
+      dateCharged:{
+        type:Date,
+        required:true,
+      }
+    },
+  ],
+  leftOverAmount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
 });
 
 //logging in middleware
