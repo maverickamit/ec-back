@@ -150,15 +150,25 @@ router.get("/api/transactions", auth, function (req, res, next) {
 chargingUsers = async () =>{
   let users = await User.find({bankLinked:true})
   users.map(async(user) => {
-    let amount = await amountToCharge(user);
+    let amount = await amountToCharge(user) + user.leftOverAmount;
     if (amount<50){
-    amount = 50
+     user.leftOverAmount += amount;
+     await user.save();
     }  
+    else{
      const charge = await stripe.charges.create({
       amount:amount,
       currency: 'usd',
       customer: user.stripeCustomerId
-   })
+      })
+      user.leftOverAmount = 0;
+      user.amountsCharged
+      user.amountsCharged = user.amountsCharged.concat({
+      amount,
+      dateCharged:new Date(),
+    });
+    await user.save()
+  }
    console.log(amount)
    })
 }
