@@ -186,7 +186,7 @@ chargingUsers = async () => {
   users.map(async (user) => {
     let amount = (await amountToCharge(user)) + user.leftOverAmount;
     if (amount < 50) {
-      user.leftOverAmount += amount;
+      user.leftOverAmount = amount;
       await user.save();
     } else {
       const charge = await stripe.charges.create({
