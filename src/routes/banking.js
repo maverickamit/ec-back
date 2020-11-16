@@ -80,14 +80,20 @@ router.post("/plaidverify", auth, function (request, response, next) {
 });
 
 // Endpoint to retrieve real-time Balances for each of an Item's accounts
-router.get("/api/balance", auth, function (req, res, next) {
-  plaidClient.getBalance(req.user.plaidToken, function (
+router.get("/api/balance", auth, async function (req, res, next) {
+  plaidClient.getBalance(req.user.plaidToken, async function (
     error,
     balanceResponse
   ) {
     if (error != null) {
-      console.log(error);
-      return res.send({
+      if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+        const linkTokenResponse = await getLinkToken(req.user);
+        res.send({
+          error: error,
+          link_token: linkTokenResponse.link_token,
+        });
+      }
+      res.send({
         error: error,
       });
     }
@@ -108,9 +114,16 @@ router.get("/api/transactions", auth, function (req, res, next) {
       count: 250,
       offset: 0,
     },
-    function (error, transactionsResponse) {
+    async function (error, transactionsResponse) {
       if (error != null) {
-        return res.send({
+        if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+          const linkTokenResponse = await getLinkToken(req.user);
+          res.send({
+            error: error,
+            link_token: linkTokenResponse.link_token,
+          });
+        }
+        res.send({
           error: error,
         });
       } else {
