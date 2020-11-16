@@ -71,10 +71,10 @@ const userSchema = mongoose.Schema({
         type: Number,
         required: true,
       },
-      dateCharged:{
-        type:Date,
-        required:true,
-      }
+      dateCharged: {
+        type: Date,
+        required: true,
+      },
     },
   ],
   leftOverAmount: {

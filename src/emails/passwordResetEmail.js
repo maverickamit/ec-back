@@ -1,7 +1,7 @@
 const sgMail = require("@sendgrid/mail");
 require("dotenv").config();
 var SENDGRID_KEY = process.env.SENDGRID_KEY;
-var API_BASEURL = process.env.API_BASEURL
+var API_BASEURL = process.env.API_BASEURL;
 sgMail.setApiKey(SENDGRID_KEY);
 
 const sendPasswordResetEmail = (email, id, token) => {
@@ -150,12 +150,11 @@ const sendPasswordResetEmail = (email, id, token) => {
   });
 };
 
-
 const sendSuccessfulResetEmail = (email, name) => {
   sgMail.send({
     to: email,
     from: "amitdgpghosh@gmail.com",
-    subject: name+", your password has been successfully reset",
+    subject: name + ", your password has been successfully reset",
     html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml"><head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
@@ -298,5 +297,6 @@ const sendSuccessfulResetEmail = (email, name) => {
 };
 
 module.exports = {
-    sendPasswordResetEmail,sendSuccessfulResetEmail
+  sendPasswordResetEmail,
+  sendSuccessfulResetEmail,
 };

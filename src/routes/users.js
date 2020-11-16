@@ -5,7 +5,10 @@ const User = require("../models/user");
 const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const { sendWelcomeEmail } = require("../emails/account");
-const { sendPasswordResetEmail,sendSuccessfulResetEmail } = require("../emails/passwordResetEmail");
+const {
+  sendPasswordResetEmail,
+  sendSuccessfulResetEmail,
+} = require("../emails/passwordResetEmail");
 
 const multer = require("multer");
 const sharp = require("sharp");
@@ -281,20 +284,19 @@ router.get("/authenticate/:token", async (req, res) => {
   }
 });
 
-
 //Endpoint for handling forgot password
 router.post("/forgotPassword", async (req, res) => {
   try {
-    const email = req.body.email
+    const email = req.body.email;
     const user = await User.findOne({
       email: email,
     });
     const resetToken = jwt.sign(
       {
-        _id:user._id,
+        _id: user._id,
         email: user.email,
       },
-      user.password+"-forgotpasswordec",
+      user.password + "-forgotpasswordec",
       {
         expiresIn: "24 hours",
       }
@@ -310,8 +312,8 @@ router.post("/forgotPassword", async (req, res) => {
 router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (!user){
-      throw new Error()
+    if (!user) {
+      throw new Error();
     }
     // const secret = user.password+"-forgotpasswordec"
     // const resetToken = jwt.decode(
@@ -404,10 +406,10 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
       </body>
       </html>
       `
-);
-  } catch(e) {
+    );
+  } catch (e) {
     res.status(500)
-    .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+      .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
       <div className="container">
         <div className="row">
           <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >Error in verification.</p>
@@ -420,14 +422,12 @@ router.get("/forgotPassword/reset/:id/:token", async (req, res) => {
 router.post("/forgotPassword/reset", async (req, res) => {
   try {
     const user = await User.findById(req.body.id);
-    if (!user){
-      throw new Error()
+    if (!user) {
+      throw new Error();
     }
-    const secret = user.password+"-forgotpasswordec"
-    const payload = jwt.verify(
-      req.body.token, secret
-    );
-    user.password = req.body.pw
+    const secret = user.password + "-forgotpasswordec";
+    const payload = jwt.verify(req.body.token, secret);
+    user.password = req.body.pw;
     await user.save();
     sendSuccessfulResetEmail(user.email, user.firstName);
 
@@ -440,8 +440,9 @@ router.post("/forgotPassword/reset", async (req, res) => {
       to continue to login.</p>
       </div>
     </div>`);
-  } catch{
-    res.status(500).send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  } catch {
+    res.status(500)
+      .send(`<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <div className="container">
       <div className="row">
         <p class="font-weight-bold " style="padding:20px;font-size:calc(100% + 1vh)" >There has been an error.</p>

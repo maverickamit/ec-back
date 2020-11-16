@@ -19,9 +19,11 @@ var corsOptions = {
 };
 app.use(express.json());
 app.use(cors(corsOptions));
-app.use(express.urlencoded({
-  extended: true
-}))
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 //Creating REST API endpoints
 app.use("/users", usersRouter);
 app.use("/users/banking", bankingRouter);

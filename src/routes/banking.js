@@ -9,7 +9,7 @@ const { sendWelcomeEmail } = require("../emails/account");
 const multer = require("multer");
 const sharp = require("sharp");
 var moment = require("moment");
-var schedule = require('node-schedule');
+var schedule = require("node-schedule");
 
 require("dotenv").config();
 var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
@@ -129,54 +129,57 @@ router.get("/api/transactions", auth, function (req, res, next) {
 });
 
 // Function to retrieve Transactions for an user and sending the total amount to be charged through Stripe
- async function amountToCharge (user) {
+async function amountToCharge(user) {
   // Pull transactions for the Item for the last 7 days i.e. from previous sunday to saturday
   var startDate = moment().subtract(7, "days").format("YYYY-MM-DD");
   var endDate = moment().subtract(1, "days").format("YYYY-MM-DD");
   const response = await plaidClient
-  .getTransactions(user.plaidToken,startDate, endDate, {})
-  .catch((err) => {
-    console.log("Error: "+ err)
-  });
+    .getTransactions(user.plaidToken, startDate, endDate, {})
+    .catch((err) => {
+      console.log("Error: " + err);
+    });
   const transactionsDetails = response.transactions;
   let amountCharged = 0;
   transactionsDetails.map((item) => {
-  let roundingup = Math.ceil(item["amount"]) - item["amount"];
-  amountCharged += roundingup;});
-  return Math.floor(amountCharged.toFixed(2)*100);
+    let roundingup = Math.ceil(item["amount"]) - item["amount"];
+    amountCharged += roundingup;
+  });
+  return Math.floor(amountCharged.toFixed(2) * 100);
 }
 
 //Function to Charge each user through Stripe
-chargingUsers = async () =>{
-  let users = await User.find({bankLinked:true})
-  users.map(async(user) => {
-    let amount = await amountToCharge(user) + user.leftOverAmount;
-    if (amount<50){
-     user.leftOverAmount += amount;
-     await user.save();
-    }  
-    else{
-     const charge = await stripe.charges.create({
-      amount:amount,
-      currency: 'usd',
-      customer: user.stripeCustomerId
-      })
+chargingUsers = async () => {
+  let users = await User.find({ bankLinked: true });
+  users.map(async (user) => {
+    let amount = (await amountToCharge(user)) + user.leftOverAmount;
+    if (amount < 50) {
+      user.leftOverAmount += amount;
+      await user.save();
+    } else {
+      const charge = await stripe.charges.create({
+        amount: amount,
+        currency: "usd",
+        customer: user.stripeCustomerId,
+      });
       user.leftOverAmount = 0;
-      user.amountsCharged
+      user.amountsCharged;
       user.amountsCharged = user.amountsCharged.concat({
-      amount,
-      dateCharged:new Date(),
-    });
-    await user.save()
-  }
-   console.log(amount)
-   })
-}
+        amount,
+        dateCharged: new Date(),
+      });
+      await user.save();
+    }
+    console.log(amount);
+  });
+};
 
 //recurrent function to run every sunday at 00:05 AM
-var recurrentFunction = schedule.scheduleJob({hour: 00, minute: 5, dayOfWeek: 0}, function(){
-  chargingUsers()
-});
+var recurrentFunction = schedule.scheduleJob(
+  { hour: 00, minute: 5, dayOfWeek: 0 },
+  function () {
+    chargingUsers();
+  }
+);
 
 //Updating Plaid Bank account linking status
 module.exports = router;
