@@ -166,18 +166,27 @@ async function amountToCharge(user) {
   // Pull transactions for the Item for the last 7 days i.e. from previous sunday to saturday
   var startDate = moment().subtract(7, "days").format("YYYY-MM-DD");
   var endDate = moment().subtract(1, "days").format("YYYY-MM-DD");
-  const response = await plaidClient
-    .getTransactions(user.plaidToken, startDate, endDate, {})
-    .catch((err) => {
-      console.log("Error: " + err);
+  try {
+    const response = await plaidClient.getTransactions(
+      user.plaidToken,
+      startDate,
+      endDate,
+      {}
+    );
+    const transactionsDetails = response.transactions;
+    let amountCharged = 0;
+    transactionsDetails.map((item) => {
+      let roundingup = Math.ceil(item["amount"]) - item["amount"];
+      amountCharged += roundingup;
     });
-  const transactionsDetails = response.transactions;
-  let amountCharged = 0;
-  transactionsDetails.map((item) => {
-    let roundingup = Math.ceil(item["amount"]) - item["amount"];
-    amountCharged += roundingup;
-  });
-  return Math.floor(amountCharged.toFixed(2) * 100);
+    return Math.floor(amountCharged.toFixed(2) * 100);
+  } catch (error) {
+    if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+      const linkTokenResponse = await getLinkToken(req.user);
+      console.log("Error: " + error);
+      return 0;
+    }
+  }
 }
 
 //Function to Charge each user through Stripe
