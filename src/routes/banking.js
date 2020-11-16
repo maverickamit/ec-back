@@ -128,6 +128,26 @@ router.get("/api/transactions", auth, function (req, res, next) {
   );
 });
 
+// Function to create a one-time use link_token
+// Used to initialize Link in update mode for the user
+
+async function getLinkToken(user) {
+  const linkTokenResponse = await plaidClient
+    .createLinkToken({
+      user: {
+        client_user_id: "UNIQUE_USER_ID",
+      },
+      client_name: "Your App Name Here",
+      country_codes: ["US"],
+      language: "en",
+      access_token: user.plaidToken,
+    })
+    .catch((err) => {
+      console.log("Error: " + err);
+    });
+  return linkTokenResponse;
+}
+
 // Function to retrieve Transactions for an user and sending the total amount to be charged through Stripe
 async function amountToCharge(user) {
   // Pull transactions for the Item for the last 7 days i.e. from previous sunday to saturday
