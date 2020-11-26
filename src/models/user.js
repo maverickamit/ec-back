@@ -54,6 +54,10 @@ const userSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+  linkUpdateToken: {
+    type: String,
+    required: false,
+  },
   tokens: [
     {
       token: {
