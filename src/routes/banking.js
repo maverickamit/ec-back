@@ -33,47 +33,48 @@ router.post("/plaidverify", auth, function (request, response, next) {
   try {
     var publicToken = request.body.PUBLIC_TOKEN;
     var accountID = request.body.ACCOUNT_ID;
-    plaidClient.exchangePublicToken(publicToken, function (
-      error,
-      tokenResponse
-    ) {
-      if (error != null) {
-        response.status(400).send();
-      } else {
-        //Saving plaid access token server side
-        accessToken = tokenResponse.access_token;
-        request.user.plaidToken = accessToken;
-        request.user.save();
+    plaidClient.exchangePublicToken(
+      publicToken,
+      function (error, tokenResponse) {
+        if (error != null) {
+          response.status(400).send();
+        } else {
+          //Saving plaid access token server side
+          accessToken = tokenResponse.access_token;
+          request.user.plaidToken = accessToken;
+          request.user.save();
 
-        plaidClient.createStripeToken(accessToken, accountID, function (
-          err,
-          res
-        ) {
-          if (error != null || res == undefined) {
-            response.status(400).send();
-          } else {
-            var bankAccountToken = res.stripe_bank_account_token;
+          plaidClient.createStripeToken(
+            accessToken,
+            accountID,
+            function (err, res) {
+              if (error != null || res == undefined) {
+                response.status(400).send();
+              } else {
+                var bankAccountToken = res.stripe_bank_account_token;
 
-            //Creating a Stripe customer object when linking bank account for first time
-            stripe.customers.create(
-              {
-                description: "Test Customer (created for API docs)",
-                source: bankAccountToken,
-              },
-              function (err, customer) {
-                if (err) {
-                  response.status(400).send();
-                }
-                request.user.bankLinked = true;
-                request.user.stripeCustomerId = customer.id;
-                request.user.save();
-                response.send();
+                //Creating a Stripe customer object when linking bank account for first time
+                stripe.customers.create(
+                  {
+                    description: "Test Customer (created for API docs)",
+                    source: bankAccountToken,
+                  },
+                  function (err, customer) {
+                    if (err) {
+                      response.status(400).send();
+                    }
+                    request.user.bankLinked = true;
+                    request.user.stripeCustomerId = customer.id;
+                    request.user.save();
+                    response.send();
+                  }
+                );
               }
-            );
-          }
-        });
+            }
+          );
+        }
       }
-    });
+    );
   } catch {
     response.status(500).send();
   }
@@ -81,24 +82,24 @@ router.post("/plaidverify", auth, function (request, response, next) {
 
 // Endpoint to retrieve real-time Balances for each of an Item's accounts
 router.get("/api/balance", auth, async function (req, res, next) {
-  plaidClient.getBalance(req.user.plaidToken, async function (
-    error,
-    balanceResponse
-  ) {
-    if (error != null) {
-      if (error.error_code === "ITEM_LOGIN_REQUIRED") {
-        const linkTokenResponse = await getLinkToken(req.user);
+  plaidClient.getBalance(
+    req.user.plaidToken,
+    async function (error, balanceResponse) {
+      if (error != null) {
+        if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+          const linkTokenResponse = await getLinkToken(req.user);
+          res.send({
+            error: error,
+            link_token: linkTokenResponse.link_token,
+          });
+        }
         res.send({
           error: error,
-          link_token: linkTokenResponse.link_token,
         });
       }
-      res.send({
-        error: error,
-      });
+      res.send(balanceResponse);
     }
-    res.send(balanceResponse);
-  });
+  );
 });
 
 //Endpoint to retrieve Transactions for an Item and sending the total amount to be charged through Stripe
@@ -211,7 +212,7 @@ chargingUsers = async () => {
       });
       await user.save();
     }
-    console.log(amount);
+    // console.log(amount);
   });
 };
 
