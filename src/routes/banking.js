@@ -183,7 +183,9 @@ async function amountToCharge(user) {
     return Math.floor(amountCharged.toFixed(2) * 100);
   } catch (error) {
     if (error.error_code === "ITEM_LOGIN_REQUIRED") {
-      const linkTokenResponse = await getLinkToken(req.user);
+      const linkTokenResponse = await getLinkToken(user);
+      user.linkUpdateToken = linkTokenResponse.link_token;
+      await user.save();
       console.log("Error: " + error);
       return 0;
     }
