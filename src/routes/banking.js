@@ -10,6 +10,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 var moment = require("moment");
 var schedule = require("node-schedule");
+const sendPlaidReverificationEmail = require("../emails/plaidReverification");
 
 require("dotenv").config();
 var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
@@ -87,15 +88,18 @@ router.get("/api/balance", auth, async function (req, res, next) {
     async function (error, balanceResponse) {
       if (error != null) {
         if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+          sendPlaidReverificationEmail(req.user.email, req.user.firstName);
+
           const linkTokenResponse = await getLinkToken(req.user);
           res.send({
             error: error,
             link_token: linkTokenResponse.link_token,
           });
+        } else {
+          res.send({
+            error: error,
+          });
         }
-        res.send({
-          error: error,
-        });
       }
       res.send(balanceResponse);
     }
@@ -118,15 +122,17 @@ router.get("/api/transactions", auth, function (req, res, next) {
     async function (error, transactionsResponse) {
       if (error != null) {
         if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+          sendPlaidReverificationEmail(req.user.email, req.user.firstName);
           const linkTokenResponse = await getLinkToken(req.user);
           res.send({
             error: error,
             link_token: linkTokenResponse.link_token,
           });
+        } else {
+          res.send({
+            error: error,
+          });
         }
-        res.send({
-          error: error,
-        });
       } else {
         let transactionsDetails = transactionsResponse.transactions;
         let amountCharged = 0;
@@ -183,8 +189,10 @@ async function amountToCharge(user) {
     return Math.floor(amountCharged.toFixed(2) * 100);
   } catch (error) {
     if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+      sendPlaidReverificationEmail(user.email, user.firstName);
       const linkTokenResponse = await getLinkToken(user);
       user.linkUpdateToken = linkTokenResponse.link_token;
+
       await user.save();
       console.log("Error: " + error);
       return 0;
@@ -225,6 +233,5 @@ var recurrentFunction = schedule.scheduleJob(
     chargingUsers();
   }
 );
-
 //Updating Plaid Bank account linking status
 module.exports = router;
