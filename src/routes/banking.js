@@ -81,6 +81,18 @@ router.post("/plaidverify", auth, function (request, response, next) {
   }
 });
 
+// End point for plaid link update i.e bank account reverification
+
+router.post("/plaidupdate", auth, async function (req, res, next) {
+  try {
+    req.user.linkUpdateToken = "";
+    await req.user.save();
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
+
 // Endpoint to retrieve real-time Balances for each of an Item's accounts
 router.get("/api/balance", auth, async function (req, res, next) {
   plaidClient.getBalance(
@@ -192,7 +204,6 @@ async function amountToCharge(user) {
       sendPlaidReverificationEmail(user.email, user.firstName);
       const linkTokenResponse = await getLinkToken(user);
       user.linkUpdateToken = linkTokenResponse.link_token;
-
       await user.save();
       console.log("Error: " + error);
       return 0;
