@@ -244,5 +244,18 @@ var recurrentFunction = schedule.scheduleJob(
     chargingUsers();
   }
 );
-//Updating Plaid Bank account linking status
+
+chargingUsers();
+
+//Endpoint for Updating Plaid Bank account linking status
+router.post("/plaiddelete", auth, async function (req, res, next) {
+  try {
+    req.user.bankLinked = false;
+    await req.user.save();
+    res.send();
+  } catch {
+    res.status(500).send();
+  }
+});
+
 module.exports = router;
