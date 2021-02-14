@@ -55,21 +55,39 @@ router.post("/plaidverify", auth, function (request, response, next) {
                 var bankAccountToken = res.stripe_bank_account_token;
 
                 //Creating a Stripe customer object when linking bank account for first time
-                stripe.customers.create(
-                  {
-                    description: "Test Customer (created for API docs)",
-                    source: bankAccountToken,
-                  },
-                  function (err, customer) {
-                    if (err) {
-                      response.status(400).send();
+                //Checking if Stripe Customer exists
+                if (!request.user.stripeCustomerId) {
+                  stripe.customers.create(
+                    {
+                      description: "Test Customer (created for API docs)",
+                      source: bankAccountToken,
+                    },
+                    function (err, customer) {
+                      if (err) {
+                        response.status(400).send();
+                      }
+                      request.user.bankLinked = true;
+                      request.user.stripeCustomerId = customer.id;
+                      request.user.save();
+                      response.send();
                     }
-                    request.user.bankLinked = true;
-                    request.user.stripeCustomerId = customer.id;
-                    request.user.save();
-                    response.send();
-                  }
-                );
+                  );
+                }
+                //Updating existing stripe customer by attaching the new source
+                else {
+                  stripe.customers.update(
+                    request.user.stripeCustomerId,
+                    { source: bankAccountToken },
+                    function (err, customer) {
+                      if (err) {
+                        response.status(400).send();
+                      }
+                      request.user.bankLinked = true;
+                      request.user.save();
+                      response.send();
+                    }
+                  );
+                }
               }
             }
           );
