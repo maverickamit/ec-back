@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
       {
         email: user.email,
       },
-      "verificationemailec",
+      process.env.JWT_EMAIL_VERIFY_SECRET,
       {
         expiresIn: "24 hours",
       }
@@ -103,7 +103,7 @@ router.post("/authenticate", auth, async (req, res) => {
       {
         email: user.email,
       },
-      "verificationemailec",
+      process.env.JWT_EMAIL_VERIFY_SECRET,
       {
         expiresIn: "24 hours",
       }
@@ -252,7 +252,7 @@ router.delete("/me", auth, async (req, res) => {
 router.get("/authenticate/:token", async (req, res) => {
   try {
     const mytoken = req.params.token;
-    const userEmail = jwt.verify(mytoken, "verificationemailec");
+    const userEmail = jwt.verify(mytoken, process.env.JWT_EMAIL_VERIFY_SECRET);
     const user = await User.findOne({
       email: userEmail.email,
     });
@@ -295,7 +295,7 @@ router.post("/forgotPassword", async (req, res) => {
         _id: user._id,
         email: user.email,
       },
-      user.password + "-forgotpasswordec",
+      user.password + process.env.JWT_PASSWORD_RESET_SECRET,
       {
         expiresIn: "24 hours",
       }
@@ -509,7 +509,7 @@ router.post("/forgotPassword/reset", async (req, res) => {
     if (!user) {
       throw new Error();
     }
-    const secret = user.password + "-forgotpasswordec";
+    const secret = user.password + process.env.JWT_PASSWORD_RESET_SECRET;
     const payload = jwt.verify(req.body.token, secret);
     user.password = req.body.pw;
     await user.save();

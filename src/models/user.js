@@ -112,7 +112,7 @@ userSchema.methods.generateAuthToken = async function () {
     {
       _id: user._id.toString(),
     },
-    "everchangetokenverification",
+    process.env.JWT_AUTH_SECRET,
     {
       expiresIn: "24h",
     }
