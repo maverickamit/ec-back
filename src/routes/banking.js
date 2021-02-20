@@ -268,9 +268,13 @@ chargingUsers();
 //Endpoint for Updating Plaid Bank account linking status
 router.post("/plaiddelete", auth, async function (req, res, next) {
   try {
-    req.user.bankLinked = !req.user.bankLinked;
-    await req.user.save();
-    res.send();
+    if (req.user.plaidToken) {
+      req.user.bankLinked = !req.user.bankLinked;
+      await req.user.save();
+      res.send();
+    } else {
+      res.status(400).send();
+    }
   } catch {
     res.status(500).send();
   }
