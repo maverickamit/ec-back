@@ -38,19 +38,18 @@ router.post("/plaidverify", auth, function (request, response, next) {
       publicToken,
       function (error, tokenResponse) {
         if (error != null) {
-          response.status(400).send();
+          response.status(400).send({ error });
         } else {
           //Saving plaid access token server side
           accessToken = tokenResponse.access_token;
           request.user.plaidToken = accessToken;
           request.user.save();
-
           plaidClient.createStripeToken(
             accessToken,
             accountID,
             function (err, res) {
-              if (error != null || res == undefined) {
-                response.status(400).send();
+              if (err != null || res == undefined) {
+                response.status(400).send({ error: err });
               } else {
                 var bankAccountToken = res.stripe_bank_account_token;
 
@@ -64,7 +63,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     },
                     function (err, customer) {
                       if (err) {
-                        response.status(400).send();
+                        response.status(400).send({ error: err });
                       }
                       request.user.bankLinked = true;
                       request.user.stripeCustomerId = customer.id;
@@ -80,7 +79,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     { source: bankAccountToken },
                     function (err, customer) {
                       if (err) {
-                        response.status(400).send();
+                        response.status(400).send({ error: err });
                       }
                       request.user.bankLinked = true;
                       request.user.save();
@@ -94,8 +93,8 @@ router.post("/plaidverify", auth, function (request, response, next) {
         }
       }
     );
-  } catch {
-    response.status(500).send();
+  } catch (error) {
+    response.status(500).send({ error: error.message });
   }
 });
 
@@ -233,7 +232,12 @@ async function amountToCharge(user) {
 chargingUsers = async () => {
   let users = await User.find({ bankLinked: true });
   users.map(async (user) => {
+    if (!user.leftOverAmount) {
+      user.leftOverAmount = 0;
+    }
     let amount = (await amountToCharge(user)) + user.leftOverAmount;
+    console.log(amount);
+
     if (amount < 50) {
       user.leftOverAmount = amount;
       await user.save();
@@ -251,7 +255,6 @@ chargingUsers = async () => {
       });
       await user.save();
     }
-    // console.log(amount);
   });
 };
 
