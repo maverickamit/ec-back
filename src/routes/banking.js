@@ -120,7 +120,7 @@ router.get("/api/balance", auth, async function (req, res, next) {
         if (error.error_code === "ITEM_LOGIN_REQUIRED") {
           sendPlaidReverificationEmail(req.user.email, req.user.firstName);
 
-          const linkTokenResponse = await getLinkToken(req.user);
+          const linkTokenResponse = await getUpdateLinkToken(req.user);
           res.send({
             error: error.error_message,
             link_token: linkTokenResponse.link_token,
@@ -153,7 +153,7 @@ router.get("/api/transactions", auth, function (req, res, next) {
       if (error != null) {
         if (error.error_code === "ITEM_LOGIN_REQUIRED") {
           sendPlaidReverificationEmail(req.user.email, req.user.firstName);
-          const linkTokenResponse = await getLinkToken(req.user);
+          const linkTokenResponse = await getUpdateLinkToken(req.user);
           res.send({
             error: error.error_message,
             link_token: linkTokenResponse.link_token,
@@ -181,7 +181,7 @@ router.get("/api/transactions", auth, function (req, res, next) {
 // Function to create a one-time use link_token
 // Used to initialize Link in update mode for the user
 
-async function getLinkToken(user) {
+async function getUpdateLinkToken(user) {
   const linkTokenResponse = await plaidClient
     .createLinkToken({
       user: {
@@ -220,7 +220,7 @@ async function amountToCharge(user) {
   } catch (error) {
     if (error.error_code === "ITEM_LOGIN_REQUIRED") {
       sendPlaidReverificationEmail(user.email, user.firstName);
-      const linkTokenResponse = await getLinkToken(user);
+      const linkTokenResponse = await getUpdateLinkToken(user);
       user.linkUpdateToken = linkTokenResponse.link_token;
       await user.save();
       return 0;
