@@ -58,7 +58,8 @@ router.post("/plaidverify", auth, function (request, response, next) {
                 if (!request.user.stripeCustomerId) {
                   stripe.customers.create(
                     {
-                      description: "Test Customer (created for API docs)",
+                      name: `${request.user.firstName} ${request.user.lastName}`,
+                      email: request.user.email,
                       source: bankAccountToken,
                     },
                     function (err, customer) {
