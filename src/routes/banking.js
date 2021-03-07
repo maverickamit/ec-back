@@ -258,7 +258,7 @@ chargingUsers = async () => {
 
 //recurrent function to run every sunday at 00:05 AM
 var recurrentFunction = schedule.scheduleJob(
-  { hour: 00, minute: 5, dayOfWeek: 0 },
+  { hour: 0, minute: 5, dayOfWeek: 0, tz: "US/Central" },
   function () {
     chargingUsers();
   }
