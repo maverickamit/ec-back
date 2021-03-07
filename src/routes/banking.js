@@ -38,7 +38,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
       publicToken,
       function (error, tokenResponse) {
         if (error != null) {
-          response.status(400).send({ error });
+          response.status(400).send({ error: error.error_message });
         } else {
           //Saving plaid access token server side
           accessToken = tokenResponse.access_token;
@@ -49,7 +49,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
             accountID,
             function (err, res) {
               if (err != null || res == undefined) {
-                response.status(400).send({ error: err });
+                response.status(400).send({ error: error.error_message });
               } else {
                 var bankAccountToken = res.stripe_bank_account_token;
 
@@ -64,7 +64,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     },
                     function (err, customer) {
                       if (err) {
-                        response.status(400).send({ error: err });
+                        response.status(400).send({ error: err.message });
                       }
                       request.user.bankLinked = true;
                       request.user.stripeCustomerId = customer.id;
@@ -80,7 +80,7 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     { source: bankAccountToken },
                     function (err, customer) {
                       if (err) {
-                        response.status(400).send({ error: err });
+                        response.status(400).send({ error: err.message });
                       }
                       request.user.bankLinked = true;
                       request.user.save();
@@ -122,12 +122,12 @@ router.get("/api/balance", auth, async function (req, res, next) {
 
           const linkTokenResponse = await getLinkToken(req.user);
           res.send({
-            error: error,
+            error: error.error_message,
             link_token: linkTokenResponse.link_token,
           });
         } else {
           res.send({
-            error: error,
+            error: error.error_message,
           });
         }
       }
@@ -155,12 +155,12 @@ router.get("/api/transactions", auth, function (req, res, next) {
           sendPlaidReverificationEmail(req.user.email, req.user.firstName);
           const linkTokenResponse = await getLinkToken(req.user);
           res.send({
-            error: error,
+            error: error.error_message,
             link_token: linkTokenResponse.link_token,
           });
         } else {
           res.send({
-            error: error,
+            error: error.error_message,
           });
         }
       } else {
@@ -187,7 +187,7 @@ async function getLinkToken(user) {
       user: {
         client_user_id: "UNIQUE_USER_ID",
       },
-      client_name: "Your App Name Here",
+      client_name: "Everchange",
       country_codes: ["US"],
       language: "en",
       access_token: user.plaidToken,
@@ -223,7 +223,6 @@ async function amountToCharge(user) {
       const linkTokenResponse = await getLinkToken(user);
       user.linkUpdateToken = linkTokenResponse.link_token;
       await user.save();
-      console.log("Error: " + error);
       return 0;
     }
   }
@@ -237,8 +236,6 @@ chargingUsers = async () => {
       user.leftOverAmount = 0;
     }
     let amount = (await amountToCharge(user)) + user.leftOverAmount;
-    console.log(amount);
-
     if (amount < 50) {
       user.leftOverAmount = amount;
       await user.save();
@@ -266,8 +263,6 @@ var recurrentFunction = schedule.scheduleJob(
     chargingUsers();
   }
 );
-
-chargingUsers();
 
 //Endpoint for Updating Plaid Bank account linking status
 router.post("/plaiddelete", auth, async function (req, res, next) {

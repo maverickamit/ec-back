@@ -1,14 +1,10 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const cors = require("cors");
-var plaid = require("plaid");
 require("dotenv").config();
-
 const port = process.env.PORT || 3000;
 require("./src/db/mongoose");
 
 const app = express();
-
 const usersRouter = require("./src/routes/users");
 const bankingRouter = require("./src/routes/banking");
 var corsOptions = {
