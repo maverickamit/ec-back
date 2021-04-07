@@ -65,11 +65,12 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     function (err, customer) {
                       if (err) {
                         response.status(400).send({ error: err.message });
+                      } else {
+                        request.user.bankLinked = true;
+                        request.user.stripeCustomerId = customer.id;
+                        request.user.save();
+                        response.send();
                       }
-                      request.user.bankLinked = true;
-                      request.user.stripeCustomerId = customer.id;
-                      request.user.save();
-                      response.send();
                     }
                   );
                 }
@@ -81,10 +82,11 @@ router.post("/plaidverify", auth, function (request, response, next) {
                     function (err, customer) {
                       if (err) {
                         response.status(400).send({ error: err.message });
+                      } else {
+                        request.user.bankLinked = true;
+                        request.user.save();
+                        response.send();
                       }
-                      request.user.bankLinked = true;
-                      request.user.save();
-                      response.send();
                     }
                   );
                 }
