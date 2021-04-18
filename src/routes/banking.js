@@ -103,6 +103,31 @@ router.post("/plaidverify", auth, function (request, response, next) {
   }
 });
 
+// Endpoint to create a one-time use link_token
+// Used to initialize Link in update mode for the user
+router.post(
+  "/create_link_token",
+  auth,
+  async function (request, response, next) {
+    try {
+      const linkTokenResponse = await plaidClient.createLinkToken({
+        user: {
+          client_user_id: "UNIQUE_USER_ID",
+        },
+        client_name: "Everchange",
+        country_codes: ["US"],
+        language: "en",
+        access_token: request.user.plaidToken,
+      });
+      request.user.linkUpdateToken = linkTokenResponse.link_token;
+      await request.user.save();
+      response.send();
+    } catch (error) {
+      response.status(500).send(error);
+    }
+  }
+);
+
 // End point for plaid link update i.e bank account reverification
 
 router.post("/plaidupdate", auth, async function (req, res, next) {
