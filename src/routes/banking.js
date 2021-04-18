@@ -43,6 +43,8 @@ router.post("/plaidverify", auth, function (request, response, next) {
           //Saving plaid access token server side
           accessToken = tokenResponse.access_token;
           request.user.plaidToken = accessToken;
+          //Deleting any already existing link update token because fresh new account is verified
+          request.user.linkUpdateToken = "";
           request.user.save();
           plaidClient.createStripeToken(
             accessToken,
