@@ -141,7 +141,7 @@ router.post("/plaidupdate", auth, async function (req, res, next) {
 });
 
 // Endpoint to retrieve real-time Balances for each of an Item's accounts
-router.get("/api/balance", auth, async function (req, res, next) {
+router.post("/api/balance", auth, async function (req, res, next) {
   plaidClient.getBalance(
     req.user.plaidToken,
     async function (error, balanceResponse) {
@@ -165,17 +165,20 @@ router.get("/api/balance", auth, async function (req, res, next) {
   );
 });
 
-//Endpoint to retrieve Transactions for an Item and sending the total amount to be charged through Stripe
-router.get("/api/transactions", auth, function (req, res, next) {
-  // Pull transactions for the Item for the last 30 days
-  var startDate = moment().subtract(30, "days").format("YYYY-MM-DD");
+//Endpoint to retrieve Transactions for logged in user
+// Pull transactions for the last specific days requested
+// Returns the specified number of transactions required provided in request
+router.post("/api/transactions", auth, function (req, res, next) {
+  var startDate = moment()
+    .subtract(req.body.no_of_days, "days")
+    .format("YYYY-MM-DD");
   var endDate = moment().format("YYYY-MM-DD");
   plaidClient.getTransactions(
     req.user.plaidToken,
     startDate,
     endDate,
     {
-      count: 250,
+      count: parseInt(req.body.no_of_records),
       offset: 0,
     },
     async function (error, transactionsResponse) {
@@ -193,14 +196,18 @@ router.get("/api/transactions", auth, function (req, res, next) {
           });
         }
       } else {
-        let transactionsDetails = transactionsResponse.transactions;
-        let amountCharged = 0;
-        transactionsDetails.map((item) => {
-          let roundingup = Math.ceil(item["amount"]) - item["amount"];
-          amountCharged += roundingup;
+        let returnedTransactions = transactionsResponse.transactions;
+        const transactionsDetails = [];
+        returnedTransactions.map((item, i) => {
+          transactionsDetails[i] = {
+            merchant:
+              item.merchant_name === null ? item.name : item.merchant_name,
+            date: item.date,
+            amount: item.amount,
+          };
         });
         res.send({
-          total: amountCharged.toFixed(2),
+          transactions: transactionsDetails,
         });
       }
     }
