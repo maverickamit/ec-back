@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
+    "start": "pm2-runtime start ecosystem.config.js --env production",
     "dev": "nodemon app.js algo.js",
     "prod": "pm2 start app.js --watch"
   },
