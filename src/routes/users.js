@@ -13,6 +13,7 @@ const {
 const multer = require("multer");
 const sharp = require("sharp");
 const bcrypt = require("bcryptjs");
+const path = require("path");
 
 require("dotenv").config();
 
@@ -85,10 +86,14 @@ router.get("/:id/avatar", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || !user.avatar) {
-      throw new Error();
+      res.set("Content-Type", "image/png");
+      res.sendFile(
+        path.join(__dirname, "../../public/images/default_avatar.png")
+      );
+    } else {
+      res.set("Content-Type", "image/png");
+      res.send(user.avatar);
     }
-    res.set("Content-Type", "image/png");
-    res.send(user.avatar);
   } catch (e) {
     res.status(404).send();
   }
