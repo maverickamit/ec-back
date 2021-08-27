@@ -4,102 +4,70 @@ const express = require("express");
 const router = new express.Router();
 const User = require("../models/user");
 const auth = require("../middleware/auth");
-const jwt = require("jsonwebtoken");
-const { sendWelcomeEmail } = require("../emails/account");
-const multer = require("multer");
-const sharp = require("sharp");
 var moment = require("moment");
 var schedule = require("node-schedule");
 const sendPlaidReverificationEmail = require("../emails/plaidReverification");
 
 require("dotenv").config();
-var PUBLIC_TOKEN = process.env.PUBLIC_TOKEN;
-var ACCOUNT_ID = process.env.ACCOUNT_ID;
 var PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 var PLAID_SECRET = process.env.PLAID_SECRET;
 var STRIPE_KEY = process.env.STRIPE_KEY;
-
 var plaid = require("plaid");
+
 var stripe = require("stripe")(STRIPE_KEY);
-var accessToken = null || process.env.ACCESS_TOKEN;
 var plaidClient = new plaid.Client({
   clientID: PLAID_CLIENT_ID,
   secret: PLAID_SECRET,
-  env: plaid.environments.sandbox,
+  env: plaid.environments[process.env.PLAID_ENV],
 });
 
 // End point for plaid verification first time linking bank account
 
-router.post("/plaidverify", auth, function (request, response, next) {
+router.post("/plaidverify", auth, async function (request, response, next) {
   try {
     var publicToken = request.body.PUBLIC_TOKEN;
     var accountID = request.body.ACCOUNT_ID;
-    plaidClient.exchangePublicToken(
-      publicToken,
-      function (error, tokenResponse) {
-        if (error != null) {
-          response.status(400).send({ error: error.error_message });
-        } else {
-          //Saving plaid access token server side
-          accessToken = tokenResponse.access_token;
-          request.user.plaidToken = accessToken;
-          //Deleting any already existing link update token because fresh new account is verified
-          request.user.linkUpdateToken = "";
-          request.user.save();
-          plaidClient.createStripeToken(
-            accessToken,
-            accountID,
-            function (err, res) {
-              if (err != null || res == undefined) {
-                response.status(400).send({ error: error.error_message });
-              } else {
-                var bankAccountToken = res.stripe_bank_account_token;
-
-                //Creating a Stripe customer object when linking bank account for first time
-                //Checking if Stripe Customer exists
-                if (!request.user.stripeCustomerId) {
-                  stripe.customers.create(
-                    {
-                      name: `${request.user.firstName} ${request.user.lastName}`,
-                      email: request.user.email,
-                      source: bankAccountToken,
-                    },
-                    function (err, customer) {
-                      if (err) {
-                        response.status(400).send({ error: err.message });
-                      } else {
-                        request.user.bankLinked = true;
-                        request.user.stripeCustomerId = customer.id;
-                        request.user.save();
-                        response.send();
-                      }
-                    }
-                  );
-                }
-                //Updating existing stripe customer by attaching the new source
-                else {
-                  stripe.customers.update(
-                    request.user.stripeCustomerId,
-                    { source: bankAccountToken },
-                    function (err, customer) {
-                      if (err) {
-                        response.status(400).send({ error: err.message });
-                      } else {
-                        request.user.bankLinked = true;
-                        request.user.save();
-                        response.send();
-                      }
-                    }
-                  );
-                }
-              }
-            }
-          );
-        }
-      }
+    const exchangePublicTokenResponse = await plaidClient.exchangePublicToken(
+      publicToken
     );
+    const accessToken = exchangePublicTokenResponse.access_token;
+    // Generate a bank account token
+    const stripeTokenResponse = await plaidClient.createStripeToken(
+      accessToken,
+      accountID
+    );
+    var bankAccountToken = stripeTokenResponse.stripe_bank_account_token;
+    // /Saving plaid access token server side
+    request.user.plaidToken = accessToken;
+    //Deleting any already existing link update token because fresh new account is verified
+    request.user.linkUpdateToken = "";
+    request.user.save();
   } catch (error) {
-    response.status(500).send({ error: error.message });
+    response.status(400).send({ plaidError: error.error_message });
+  }
+
+  //Creating a Stripe customer object when linking bank account for first time
+  //Checking if Stripe Customer exists
+  try {
+    if (!request.user.stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        name: `${request.user.firstName} ${request.user.lastName}`,
+        email: request.user.email,
+        source: bankAccountToken,
+      });
+    }
+    //Updating existing stripe customer by attaching the new source
+    else {
+      const customer = await stripe.customers.update(
+        request.user.stripeCustomerId,
+        { source: bankAccountToken }
+      );
+    }
+    request.user.bankLinked = true;
+    request.user.save();
+    response.send();
+  } catch (error) {
+    response.status(400).send({ stripeError: error.message });
   }
 });
 
