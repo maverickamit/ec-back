@@ -78,6 +78,44 @@ router.post(
   auth,
   async function (request, response, next) {
     try {
+      if (request.body.mode === "update") {
+        const linkTokenResponse = await plaidClient.createLinkToken({
+          user: {
+            client_user_id: request.user._id,
+          },
+          client_name: "Everchange",
+          country_codes: ["US"],
+          language: "en",
+          access_token: request.user.plaidToken,
+        });
+        request.user.linkUpdateToken = linkTokenResponse.link_token;
+        await request.user.save();
+        response.send();
+      } else {
+        const linkTokenResponse = await plaidClient.createLinkToken({
+          user: {
+            client_user_id: request.user._id,
+          },
+          client_name: "Everchange",
+          country_codes: ["US"],
+          products: ["auth", "transactions"],
+          language: "en",
+        });
+        response.send(linkTokenResponse.link_token);
+      }
+    } catch (error) {
+      response.status(500).send(error);
+    }
+  }
+);
+
+// Endpoint to create a one-time use link_token
+// Used to initialize Link in update mode for the user
+router.post(
+  "/create_link_token",
+  auth,
+  async function (request, response, next) {
+    try {
       const linkTokenResponse = await plaidClient.createLinkToken({
         user: {
           client_user_id: "UNIQUE_USER_ID",
@@ -108,78 +146,110 @@ router.post("/plaidupdate", auth, async function (req, res, next) {
   }
 });
 
+//Endpoint to retrieve account information with institution details
+router.post("/api/accounts", auth, async function (req, res, next) {
+  if (req.user.bankLinked) {
+    try {
+      const item_response = await plaidClient.getItem(req.user.plaidToken);
+      const institutionID = item_response.item.institution_id;
+      const institution_response = await plaidClient.getInstitutionById(
+        institutionID
+      );
+      const institution_name = institution_response.institution.name;
+      const accounts_response = await plaidClient.getAuth(
+        req.user.plaidToken,
+        {}
+      );
+      const accountData = accounts_response.accounts[0];
+      res.send({ bank_name: institution_name, mask: accountData.mask });
+    } catch (error) {
+      res.status(400).send();
+    }
+  } else {
+    res.status(400).send();
+  }
+});
+
 // Endpoint to retrieve real-time Balances for each of an Item's accounts
 router.post("/api/balance", auth, async function (req, res, next) {
-  plaidClient.getBalance(
-    req.user.plaidToken,
-    async function (error, balanceResponse) {
-      if (error != null) {
-        if (error.error_code === "ITEM_LOGIN_REQUIRED") {
-          sendPlaidReverificationEmail(req.user.email, req.user.firstName);
+  if (req.user.bankLinked) {
+    plaidClient.getBalance(
+      req.user.plaidToken,
+      async function (error, balanceResponse) {
+        if (error != null) {
+          if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+            sendPlaidReverificationEmail(req.user.email, req.user.firstName);
 
-          const linkTokenResponse = await getUpdateLinkToken(req.user);
-          res.send({
-            error: error.error_message,
-            link_token: linkTokenResponse.link_token,
-          });
-        } else {
-          res.send({
-            error: error.error_message,
-          });
+            const linkTokenResponse = await getUpdateLinkToken(req.user);
+            res.send({
+              error: error.error_message,
+              link_token: linkTokenResponse.link_token,
+            });
+          } else {
+            res.send({
+              error: error.error_message,
+            });
+          }
         }
+        res.send(balanceResponse);
       }
-      res.send(balanceResponse);
-    }
-  );
+    );
+  } else {
+    res.status(400).send();
+  }
 });
 
 //Endpoint to retrieve Transactions for logged in user
 // Pull transactions for the last specific days requested
 // Returns the specified number of transactions required provided in request
 router.post("/api/transactions", auth, function (req, res, next) {
-  var startDate = moment()
-    .subtract(req.body.no_of_days, "days")
-    .format("YYYY-MM-DD");
-  var endDate = moment().format("YYYY-MM-DD");
-  plaidClient.getTransactions(
-    req.user.plaidToken,
-    startDate,
-    endDate,
-    {
-      count: parseInt(req.body.no_of_records),
-      offset: 0,
-    },
-    async function (error, transactionsResponse) {
-      if (error != null) {
-        if (error.error_code === "ITEM_LOGIN_REQUIRED") {
-          sendPlaidReverificationEmail(req.user.email, req.user.firstName);
-          const linkTokenResponse = await getUpdateLinkToken(req.user);
-          res.send({
-            error: error.error_message,
-            link_token: linkTokenResponse.link_token,
-          });
+  if (req.user.bankLinked) {
+    var startDate = moment()
+      .subtract(req.body.no_of_days, "days")
+      .format("YYYY-MM-DD");
+    var endDate = moment().format("YYYY-MM-DD");
+    plaidClient.getTransactions(
+      req.user.plaidToken,
+      startDate,
+      endDate,
+      {
+        count: parseInt(req.body.no_of_records),
+        offset: 0,
+      },
+      async function (error, transactionsResponse) {
+        if (error != null) {
+          if (error.error_code === "ITEM_LOGIN_REQUIRED") {
+            sendPlaidReverificationEmail(req.user.email, req.user.firstName);
+            const linkTokenResponse = await getUpdateLinkToken(req.user);
+            res.send({
+              error: error.error_message,
+              link_token: linkTokenResponse.link_token,
+            });
+          } else {
+            res.send({
+              error: error.error_message,
+            });
+          }
         } else {
+          let returnedTransactions = transactionsResponse.transactions;
+          const transactionsDetails = [];
+          returnedTransactions.map((item, i) => {
+            transactionsDetails[i] = {
+              merchant:
+                item.merchant_name === null ? item.name : item.merchant_name,
+              date: item.date,
+              amount: item.amount,
+            };
+          });
           res.send({
-            error: error.error_message,
+            transactions: transactionsDetails,
           });
         }
-      } else {
-        let returnedTransactions = transactionsResponse.transactions;
-        const transactionsDetails = [];
-        returnedTransactions.map((item, i) => {
-          transactionsDetails[i] = {
-            merchant:
-              item.merchant_name === null ? item.name : item.merchant_name,
-            date: item.date,
-            amount: item.amount,
-          };
-        });
-        res.send({
-          transactions: transactionsDetails,
-        });
       }
-    }
-  );
+    );
+  } else {
+    res.status(400).send();
+  }
 });
 
 // Function to create a one-time use link_token
