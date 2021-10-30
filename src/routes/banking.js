@@ -55,6 +55,7 @@ router.post("/plaidverify", auth, async function (request, response, next) {
         email: request.user.email,
         source: bankAccountToken,
       });
+      request.user.stripeCustomerId = customer.id;
     }
     //Updating existing stripe customer by attaching the new source
     else {
