@@ -86,6 +86,21 @@ const userSchema = mongoose.Schema({
     required: true,
     default: 0,
   },
+  subscriptionDetails: {
+    startDate: {
+      type: Date,
+      required: false,
+    },
+    renewDate: {
+      type: Date,
+      required: false,
+    },
+    daysPassed: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+  },
 });
 
 //logging in middleware
