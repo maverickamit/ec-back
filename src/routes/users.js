@@ -203,43 +203,33 @@ router.patch("/me", auth, async (req, res) => {
     return allowedUpdates.includes(update);
   });
 
-  //checking if provided old password is correct before updating
-
   try {
     const user = req.user;
+    if (!user) {
+      throw new Error();
+    }
+
+    //checking if provided old password is correct before updating
     const isPassWordValid = await bcrypt.compare(
       body.oldPassword,
       user.password
     );
     if (!isPassWordValid) {
-      res.status(400).send({
-        error: "Invalid Password!",
-      });
+      throw new Error("Invalid Password!");
     }
-  } catch (e) {
-    res.status(500).send(e);
-  }
+    if (!isValidOperation) {
+      throw new Error("Invalid updates!");
+    }
 
-  if (!isValidOperation) {
-    res.status(400).send({
-      error: "Invalid updates!",
-    });
-  }
-  try {
-    const user = req.user;
     updatesUsed.forEach((update) => {
       if (body[update] !== "" && body[update] !== user[update]) {
         user[update] = body[update];
       }
     });
     await user.save();
-
-    if (!user) {
-      res.status(404).send();
-    }
     res.send(user);
-  } catch (e) {
-    res.status(500).send(e);
+  } catch (err) {
+    res.status(500).send(err.message);
   }
 });
 
