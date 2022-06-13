@@ -245,6 +245,12 @@ router.delete("/me", auth, async (req, res) => {
   }
 });
 
+//Get list of charities
+
+router.get("/charities", async (req, res) => {
+  res.send(options);
+});
+
 //Updating Charity details
 
 router.patch("/me/charity", auth, async (req, res) => {
