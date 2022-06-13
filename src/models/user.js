@@ -104,9 +104,8 @@ const userSchema = mongoose.Schema({
   currentCharity: {
     id: {
       type: Number,
-    },
-    name: {
-      type: String,
+      required: true,
+      default: 100,
     },
   },
 });
