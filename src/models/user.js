@@ -101,6 +101,14 @@ const userSchema = mongoose.Schema({
       default: 0,
     },
   },
+  currentCharity: {
+    id: {
+      type: Number,
+    },
+    name: {
+      type: String,
+    },
+  },
 });
 
 //logging in middleware
