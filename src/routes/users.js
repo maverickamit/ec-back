@@ -14,6 +14,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const { options } = require("../charities");
 
 require("dotenv").config();
 
@@ -241,6 +242,23 @@ router.delete("/me", auth, async (req, res) => {
     res.send(user);
   } catch (e) {
     res.status(500).send(e);
+  }
+});
+
+//Updating Charity details
+
+router.patch("/me/charity", auth, async (req, res) => {
+  const body = req.body;
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new Error();
+    }
+    user.currentCharity.id = body.charityId;
+    await user.save();
+    res.send(user);
+  } catch (err) {
+    res.status(500).send(err.message);
   }
 });
 
