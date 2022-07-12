@@ -7,6 +7,8 @@ require("./src/db/mongoose");
 const app = express();
 const usersRouter = require("./src/routes/users");
 const bankingRouter = require("./src/routes/banking");
+const adminRouter = require("./src/routes/admin");
+
 var corsOptions = {
   origin: process.env.CLIENT_APP_URL,
   optionsSuccessStatus: 200,
@@ -23,6 +25,7 @@ app.use(
 //Creating REST API endpoints
 app.use("/users", usersRouter);
 app.use("/users/banking", bankingRouter);
+app.use("/admin", adminRouter);
 
 //Serving the app on port 3000
 app.listen(port, () => {
