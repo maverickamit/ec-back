@@ -2,7 +2,8 @@
 const express = require("express");
 const router = new express.Router();
 const Admin = require("../models/admin");
-const auth = require("../middleware/auth");
+const User = require("../models/user");
+const auth = require("../middleware/adminAuth");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const path = require("path");
@@ -23,6 +24,17 @@ router.post("/login", async (req, res) => {
       admin,
       token,
     });
+  } catch (e) {
+    res.status(404).send("Error: " + e);
+  }
+});
+
+//Endpoint for getting list of customers with details
+
+router.post("/customers", auth, async (req, res) => {
+  try {
+    const customers = await User.find().select(`firstName + lastName + email`);
+    res.send(customers);
   } catch (e) {
     res.status(404).send("Error: " + e);
   }
