@@ -10,7 +10,7 @@ const bankingRouter = require("./src/routes/banking");
 const adminRouter = require("./src/routes/admin");
 
 var corsOptions = {
-  origin: process.env.CLIENT_APP_URL,
+  origin: [process.env.CLIENT_APP_URL1, process.env.CLIENT_APP_URL2],
   optionsSuccessStatus: 200,
   preflightContinue: true,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
